@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Best Json Tool There Is Bro</title>
+     
+     <link rel="stylesheet" href= "jsonize.css">
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>BEST JSON TOOL</h1>
+
+      <div class="controls">
+        <div class="control-group">
+          <div class="input-group">
+            <label for="searchInput">Search</label>
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search in JSON..."
+            />
+          </div>
+          <div style="display: flex; align-items: flex-end">
+            <button id="searchBtn" class="btn">Search</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="input-group">
+            <label for="scriptInput">JavaScript Filter</label>
+            <input
+              type="text"
+              id="scriptInput"
+              placeholder="data.filter(x => x.age > 25)"
+            />
+          </div>
+           <div style="display: flex; align-items: flex-end">
+            <button id="runScript" class="btn">Run</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="main-area">
+        <div class="panel">
+          <h2>JSON Input</h2>
+          <textarea
+            id="jsonInput"
+            placeholder="Paste your JSON here..."
+          ></textarea>
+        </div>
+
+        <div class="panel">
+          <h2>Tree View</h2>
+          <div id="output"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="jsonize.js"></script>
+  </body>
+</html>
