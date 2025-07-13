@@ -3,29 +3,25 @@ const searchBtn = document.getElementById("searchBtn");
 const jsonInput = document.getElementById("jsonInput");
 const output = document.getElementById("output");
 const scriptInput = document.getElementById("scriptInput");
-//const renderBtn = document.getElementById("renderBtn");
+const runScript = document.getElementById("runScript");
+const renderBtn = document.getElementById("renderBtn");
+const reverseBtn = document.getElementById("reverseBtn");
 
 let matches = [];
 let currentIndex = -1;
 let lastSearchTerm = "";
+let currentJsonData = null; // Store the current JSON data
 
 // Event listeners
-searchBtn.addEventListener("click", doSearch);
+searchBtn.addEventListener("click", handleSearch);
+runScript.addEventListener("click", applyScript);
+renderBtn.addEventListener("click", renderJson);
+reverseBtn.addEventListener("click", reverseToJson);
 
 searchInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
-    const currentTerm = searchInput.value.trim();
-
-    if (currentTerm === "") return;
-
-    if (currentTerm !== lastSearchTerm) {
-      doSearch();
-    } else if (matches.length > 0) {
-      goNext();
-    } else {
-      doSearch();
-    }
+    handleSearch();
   }
 });
 
@@ -36,31 +32,52 @@ scriptInput.addEventListener("keydown", (e) => {
   }
 });
 
-//renderBtn.addEventListener("click", renderJson);
+function handleSearch() {
+  const currentTerm = searchInput.value.trim();
 
-// Auto-render on paste
-jsonInput.addEventListener("paste", () => {
-  setTimeout(() => {
-    if (jsonInput.value.trim()) {
-      renderJson();
-    }
-  }, 100);
-});
+  if (currentTerm === "") return;
+
+  if (currentTerm !== lastSearchTerm) {
+    doSearch();
+  } else if (matches.length > 0) {
+    goNext();
+  } else {
+    doSearch();
+  }
+}
 
 function renderJson() {
   const input = jsonInput.value.trim();
 
   if (!input) {
     output.innerHTML = "";
+    currentJsonData = null;
     return;
   }
 
   try {
     const json = JSON.parse(input);
+    currentJsonData = json; // Store the parsed data
     output.innerHTML = "";
     output.appendChild(renderTree(json));
   } catch (err) {
     output.innerHTML = `<div class="error">Invalid JSON: ${err.message}</div>`;
+    currentJsonData = null;
+  }
+}
+
+function reverseToJson() {
+  if (!currentJsonData) {
+    jsonInput.value = "";
+    return;
+  }
+
+  try {
+    // Convert the current JSON data back to beautified string
+    const beautifiedJson = JSON.stringify(currentJsonData, null, 2);
+    jsonInput.value = beautifiedJson;
+  } catch (err) {
+    console.error("Error reversing JSON:", err);
   }
 }
 
@@ -194,6 +211,7 @@ function applyScript() {
     parsed = JSON.parse(raw);
   } catch (e) {
     output.innerHTML = `<div class="error">Invalid JSON: ${e.message}</div>`;
+    currentJsonData = null;
     return;
   }
 
@@ -201,9 +219,11 @@ function applyScript() {
     const scriptResult = eval(
       `(() => { const data = ${JSON.stringify(parsed)}; return ${script}; })()`
     );
+    currentJsonData = scriptResult; // Store the script result
     output.innerHTML = "";
     output.appendChild(renderTree(scriptResult));
   } catch (e) {
     output.innerHTML = `<div class="error">Script error: ${e.message}</div>`;
+    currentJsonData = null;
   }
 }
