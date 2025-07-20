@@ -3,68 +3,96 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Best Json Tool There Is Bro</title>
-    <link rel="stylesheet" href="jsonize.css" />
+    <title>JSON Tool</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
+    <link rel="stylesheet" href="jsonize.css" />
   </head>
 
   <body>
-    <div class="container">
-      <h1>BEST JSON TOOL</h1>
-
-      <div class="controls">
-        <div class="control-group">
-          <div class="input-group">
-            <label for="searchInput">Search</label>
-            <input
-              type="text"
-              id="searchInput"
-              placeholder="Search in JSON..."
-            />
-          </div>
-          <div style="display: flex; align-items: flex-end">
-            <button id="searchBtn" class="btn">Search</button>
-          </div>
+    <nav class="navbar">
+      <div class="navbar-content">
+        <div class="navbar-brand" id="navbarBrand">
+          <h1>JSON Tool</h1>
         </div>
-
-        <div class="control-group">
-          <div class="input-group">
-            <label for="scriptInput">JavaScript Filter</label>
-            <input
-              type="text"
-              id="scriptInput"
-              placeholder="data.filter(x => x.age > 25)"
-            />
-          </div>
-          <div style="display: flex; align-items: flex-end">
-            <button id="runScript" class="btn">Run</button>
-          </div>
+        <div class="navbar-actions">
+          <button
+            class="theme-toggle"
+            id="themeToggle"
+            title="Toggle Dark Mode"
+          >
+            <i class="fas fa-moon"></i>
+          </button>
         </div>
       </div>
+    </nav>
 
-      <div class="main-area">
-        <div class="panel">
-          <h2>JSON Input</h2>
+    <div class="container">
+      <div class="main-area" id="mainArea">
+        <div class="panel" id="inputPanel">
+          <div class="panel-header">
+            <h2>JSON Input</h2>
+            <div class="panel-actions">
+              <button class="panel-btn" id="searchBtn" title="Search">
+                <i class="fas fa-search"></i>
+              </button>
+              <button class="panel-btn" id="scriptBtn" title="Run Script">
+                <i class="fas fa-code"></i>
+              </button>
+              <div class="input-popup" id="searchPopup">
+                <input
+                  type="text"
+                  id="searchInput"
+                  placeholder="Search in JSON..."
+                />
+                <div class="popup-actions">
+                  <button class="popup-btn primary" id="doSearch">
+                    Search
+                  </button>
+                  <button class="popup-btn secondary" id="cancelSearch">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+              <div class="input-popup" id="scriptPopup">
+                <input
+                  type="text"
+                  id="scriptInput"
+                  placeholder="data.filter(x => x.age > 25)"
+                />
+                <div class="popup-actions">
+                  <button class="popup-btn primary" id="runScript">Run</button>
+                  <button class="popup-btn secondary" id="cancelScript">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
           <textarea
             id="jsonInput"
             placeholder="Paste your JSON here..."
           ></textarea>
         </div>
 
-        <div class="format-button-container">
-          <button id="renderBtn" class="format-btn">
+        <div class="button-container">
+          <button id="renderBtn" class="action-btn">
             <i class="fas fa-arrow-right"></i>
           </button>
-          <button id="reverseBtn" class="reverse-tree-btn">
+          <button id="reverseBtn" class="action-btn reverse-btn">
             <i class="fas fa-arrow-left"></i>
           </button>
+          <div class="resize-container">
+            <div class="resize-handle" id="resizeHandle"></div>
+          </div>
         </div>
 
-        <div class="panel">
-          <h2>Tree View</h2>
+        <div class="panel" id="outputPanel">
+          <div class="panel-header">
+            <h2>Tree View</h2>
+          </div>
           <div id="output"></div>
         </div>
       </div>
