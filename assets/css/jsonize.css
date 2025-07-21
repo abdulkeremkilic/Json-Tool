@@ -318,14 +318,17 @@ body.dark .panel-btn.active {
 .input-popup {
   position: absolute;
   top: 100%;
-  right: 0;
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-  padding: 8px;
-  z-index: 1000;
-  min-width: 200px;
+  left: 0;
+  width: 250px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  padding: 1rem;
+  z-index: 999;
   display: none;
-  transition: background-color 0.2s, border-color 0.2s;
 }
 
 .input-popup.active {
@@ -339,6 +342,7 @@ body.dark .input-popup {
 
 .input-popup input {
   width: 100%;
+  height: auto;
   padding: 8px;
   border: 1px solid #d1d5db;
   background: #ffffff;
@@ -374,13 +378,18 @@ body.dark .input-popup input::placeholder {
 }
 
 .popup-btn {
-  padding: 6px 12px;
-  border: 1px solid #d1d5db;
-  font-size: 12px;
-  cursor: pointer;
-  font-family: inherit;
-  font-weight: 500;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 250px;
+  padding: 1rem;
+  border-radius: 8px;
+  background: rgba(157, 147, 147, 0.532); /* beyaz transparan */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  z-index: 1000;
 }
 
 .popup-btn.primary {
@@ -392,6 +401,11 @@ body.dark .input-popup input::placeholder {
 .popup-btn.primary:hover {
   background: #1d4ed8;
   border-color: #1d4ed8;
+}
+
+.popup-container {
+  position: relative;
+  display: inline-block;
 }
 
 body.dark .popup-btn.primary {
@@ -599,6 +613,69 @@ body.dark .error {
 
 body.dark .success {
   color: #34d399;
+}
+
+#inputPanel,
+#outputPanel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+#contactSupport {
+  position: absolute;
+  bottom: 50px; /* ne kadar yukarıda dursun */
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: #526ec8;
+}
+
+body.dark #contactSupport {
+  color: #059669;
+}
+
+.script-example-container {
+  position: relative;
+  display: inline-block;
+}
+
+.script-example-popup {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 250px;
+  padding: 1rem;
+  border-radius: 8px;
+  background: rgba(157, 147, 147, 0.532); /* beyaz transparan */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  z-index: 1000;
+  display: none;
+}
+
+body.dark-mode .script-example-popup {
+  background: rgba(101, 96, 96, 0.619);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.script-example-popup ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.script-example-popup li {
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.script-example-popup li:hover {
+  background-color: var(--hover, #748dc9);
 }
 
 /* Responsive */

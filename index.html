@@ -9,7 +9,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
     <link rel="stylesheet" href="assets/css/jsonize.css" />
-    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="icon" type="image/svg+xml" href="icon.svg" />
   </head>
 
   <body>
@@ -36,38 +36,63 @@
           <div class="panel-header">
             <h2>JSON Input</h2>
             <div class="panel-actions">
-              <button class="panel-btn" id="searchBtn" title="Search">
-                <i class="fas fa-search"></i>
-              </button>
-              <button class="panel-btn" id="scriptBtn" title="Run Script">
-                <i class="fas fa-code"></i>
-              </button>
-              <div class="input-popup" id="searchPopup">
-                <input
-                  type="text"
-                  id="searchInput"
-                  placeholder="Search in JSON..."
-                />
-                <div class="popup-actions">
-                  <button class="popup-btn primary" id="doSearch">
-                    Search
-                  </button>
-                  <button class="popup-btn secondary" id="cancelSearch">
-                    Cancel
-                  </button>
+              <div class="popup-container">
+                <button class="panel-btn" id="searchBtn" title="Search">
+                  <i class="fas fa-search"></i>
+                </button>
+                <div class="input-popup" id="searchPopup">
+                  <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search in JSON..."
+                  />
+                  <div class="popup-actions">
+                    <button class="popup-btn primary" id="doSearch">
+                      Search
+                    </button>
+                  </div>
                 </div>
               </div>
-              <div class="input-popup" id="scriptPopup">
-                <input
-                  type="text"
-                  id="scriptInput"
-                  placeholder="data.filter(x => x.age > 25)"
-                />
-                <div class="popup-actions">
-                  <button class="popup-btn primary" id="runScript">Run</button>
-                  <button class="popup-btn secondary" id="cancelScript">
-                    Cancel
-                  </button>
+
+              <div class="popup-container">
+                <button class="panel-btn" id="scriptBtn" title="Run Script">
+                  <i class="fas fa-code"></i>
+                </button>
+                <div class="input-popup" id="scriptPopup">
+                  <input
+                    type="text"
+                    id="scriptInput"
+                    placeholder="data.filter(x => x.age > 25)"
+                  />
+                  <div class="popup-actions">
+                    <button class="popup-btn primary" id="runScript">
+                      Run
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="script-example-container">
+                <button
+                  class="panel-btn"
+                  id="examplesBtn"
+                  title="Script Examples"
+                >
+                  <i class="fas fa-lightbulb"></i>
+                </button>
+                <div class="script-example-popup" id="scriptExamplePopup">
+                  <h3>Script Examples</h3>
+                  <h5>(Exclusive for Darwin)</h5>
+                  <h6>QUOTE:</h6>
+                  <ul>
+                    <li data-script="data.filter(x => x.age > 25)">
+                      Filter by Age
+                    </li>
+                    <li data-script="data.map(x => x.name)">Get By Name</li>
+                    <li data-script="data.employees.filter(x => x.name.toLowerCase().includes('john'))">
+                      Find Employee By Name
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -97,6 +122,11 @@
           <div id="output"></div>
         </div>
       </div>
+    </div>
+    <div id="contactSupport">
+      <h6>v1.0</h6>
+      <h5>Work In Progress</h5>
+      <h4>Please Contact Abdulkerem Kılıç For Suggestions</h4>
     </div>
     <script src="assets/js/jsonize.js"></script>
   </body>
