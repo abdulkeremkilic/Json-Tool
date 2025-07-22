@@ -623,15 +623,21 @@ body.dark .success {
 }
 
 #contactSupport {
-  position: absolute;
-  bottom: 50px; /* ne kadar yukarıda dursun */
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: center;
-  color: #526ec8;
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+        color: #5c78d3;
+        background-color: #1e1e2f;
+        padding: 10px;
+        z-index: 1000;
+        width: 100%;
+        box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
 }
 
 body.dark #contactSupport {
+  background-color: white;
   color: #059669;
 }
 
@@ -694,6 +700,7 @@ body.dark-mode .script-example-popup {
 
   .container {
     padding: 12px;
+    flex: 1;
   }
 
   .main-area {
