@@ -182,6 +182,21 @@ body.dark .reverse-btn:hover {
   margin-top: 12px;
 }
 
+.inline-input {
+  width: 250px;
+  padding: 6px;
+  margin-top: 0px;
+  border: 1px solid #d1d5db;
+  font-size: 12px;
+  background: #fff;
+}
+
+body.dark .inline-input {
+  background: #525267b1;
+  color: #e5e7eb;
+  border-color: #59596387;
+}
+
 .resize-handle {
   width: 20px;
   height: 60px;

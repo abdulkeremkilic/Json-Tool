@@ -1,11 +1,6 @@
 // Elements
 const searchBtn = document.getElementById("searchBtn");
 const scriptBtn = document.getElementById("scriptBtn");
-const searchPopup = document.getElementById("searchPopup");
-const scriptPopup = document.getElementById("scriptPopup");
-const searchInput = document.getElementById("searchInput");
-const scriptInput = document.getElementById("scriptInput");
-const doSearch = document.getElementById("doSearch");
 const runScript = document.getElementById("runScript");
 const cancelSearch = document.getElementById("cancelSearch");
 const cancelScript = document.getElementById("cancelScript");
@@ -19,6 +14,8 @@ const themeToggle = document.getElementById("themeToggle");
 const navbarBrand = document.getElementById("navbarBrand");
 const examplesBtn = document.getElementById("examplesBtn");
 const scriptExamplePopup = document.getElementById("scriptExamplePopup");
+const searchInline = document.getElementById("searchInline");
+const scriptInline = document.getElementById("scriptInline");
 
 let matches = [];
 let currentIndex = -1;
@@ -47,78 +44,67 @@ navbarBrand.addEventListener("click", () => {
   window.location.reload();
 });
 
-// Popup controls
-searchBtn.addEventListener('click', () => {
-  searchPopup.style.display = searchPopup.style.display === 'block' ? 'none' : 'block';
-});
-scriptBtn.addEventListener('click', () => {
-  scriptPopup.style.display = scriptPopup.style.display === 'block' ? 'none' : 'block';
+// Toggle göster/gizle
+searchBtn.addEventListener("click", () => {
+  searchInline.style.display =
+    searchInline.style.display === "none" ? "block" : "none";
+  scriptInline.style.display = "none";
+  searchInline.focus();
 });
 
-// Search functionality
-doSearch.addEventListener("click", handleSearch);
-searchInput.addEventListener("keydown", (e) => {
+scriptBtn.addEventListener("click", () => {
+  scriptInline.style.display =
+    scriptInline.style.display === "none" ? "block" : "none";
+  searchInline.style.display = "none";
+  scriptInline.focus();
+});
+
+
+
+scriptInline.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
-    e.preventDefault();
-    handleSearch();
+    applyScript(scriptInline.value);
   }
 });
 
-// Script functionality
-runScript.addEventListener("click", applyScript);
-scriptInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    applyScript();
-  }
+examplesBtn.addEventListener("click", (e) => {
+  e.stopPropagation(); // olayın dışarıya sıçramasını engelle
+  scriptExamplePopup.style.display =
+    scriptExamplePopup.style.display === "block" ? "none" : "block";
 });
 
-
-examplesBtn.addEventListener('click', (e) => {
-   e.stopPropagation(); // olayın dışarıya sıçramasını engelle
-  scriptExamplePopup.style.display = scriptExamplePopup.style.display === 'block' ? 'none' : 'block';
-});
-
-document.querySelectorAll('#scriptExamplePopup li').forEach(li => {
-  li.addEventListener('click', (e) => {
+document.querySelectorAll("#scriptExamplePopup li").forEach((li) => {
+  li.addEventListener("click", (e) => {
     e.stopPropagation(); // dış click gibi algılanmasın
-    const script = li.getAttribute('data-script');
-    scriptInput.value = script;
-    scriptPopup.style.display = 'block';
-    scriptExamplePopup.style.display = 'none';
+    const script = li.getAttribute("data-script");
+    scriptInline.value = script;
+    scriptInline.style.display = "block";
+    searchInline.style.display = "none";
+    scriptExamplePopup.style.display = "none";
   });
 });
 
-document.addEventListener('click', (e) => {
+document.addEventListener("click", (e) => {
   const popups = [
-    document.getElementById('searchPopup'),
-    document.getElementById('scriptPopup'),
-    document.getElementById('scriptExamplePopup')
+    document.getElementById("searchPopup"),
+    document.getElementById("scriptPopup"),
+    document.getElementById("scriptExamplePopup"),
   ];
   const triggers = [
-    document.getElementById('searchBtn'),
-    document.getElementById('scriptBtn'),
-    document.getElementById('examplesBtn')
+    document.getElementById("searchBtn"),
+    document.getElementById("scriptBtn"),
+    document.getElementById("examplesBtn"),
   ];
 
   popups.forEach((popup, i) => {
-    if (
-      popup &&
-      !popup.contains(e.target) &&
-      !triggers[i].contains(e.target)
-    ) {
-      popup.style.display = 'none';
-      
+    if (popup && !popup.contains(e.target) && !triggers[i].contains(e.target)) {
+      popup.style.display = "none";
+
       const input = popup.querySelector("input");
       if (input) input.value = "";
     }
   });
 });
-
-
-// Render functionality
-renderBtn.addEventListener("click", renderJson);
-reverseBtn.addEventListener("click", reverseToJson);
 
 // Resize functionality
 let currentPosition = 50; // Start at 50% (equal split)
@@ -195,18 +181,186 @@ function closePopup(popup, button) {
   button.classList.remove("active");
 }
 
-function handleSearch() {
-  const currentTerm = searchInput.value.trim();
-  if (!currentTerm) return;
+// Enter ile çalıştır
+searchInline.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    handleSearch(searchInline.value);
+  }
+});
 
-  if (currentTerm !== lastSearchTerm) {
-    doSearchAction();
-  } else if (matches.length > 0) {
-    goNext();
+function handleSearch(term) {
+  clearHighlights();
+  matches = [];
+  currentIndex = -1;
+  if (!term) return;
+
+  lastSearchTerm = term;
+
+  // Pathleri bul
+  const foundPaths = findPathsContainingTerm(currentJsonData, term);
+
+  // Pathleri aç ve highlight callback olarak çağır
+  expandPathsLazy(foundPaths, () => {
+    highlightMatches(term);
+
+    if (matches.length > 0) {
+      currentIndex = 0;
+      updateActiveMatch();
+    }
+  });
+}
+
+// JSON’da path bulma
+// Key + Value arama
+function findPathsContainingTerm(obj, term, path = "") {
+  let paths = [];
+  const lowerTerm = term.toLowerCase();
+
+  if (typeof obj === "object" && obj !== null) {
+    for (const [key, value] of Object.entries(obj)) {
+      const currentPath = path ? `${path}.${key}` : key;
+
+      // Key eşleşmesi
+      if (key.toLowerCase().includes(lowerTerm)) {
+        paths.push(currentPath);
+      }
+
+      // Value eşleşmesi
+      if (
+        typeof value !== "object" &&
+        String(value).toLowerCase().includes(lowerTerm)
+      ) {
+        paths.push(currentPath);
+      }
+
+      // Alt objeleri gez
+      if (typeof value === "object" && value !== null) {
+        paths = paths.concat(findPathsContainingTerm(value, term, currentPath));
+      }
+    }
+  }
+
+  return paths;
+}
+
+// Lazy expand + callback
+function expandPathsLazy(paths, callback) {
+  let totalPaths = paths.length;
+  let completed = 0;
+
+  if (totalPaths === 0) {
+    callback();
+    return;
+  }
+
+  // Root detayını aç ve render bitmesini bekle
+  const rootDetails = output.querySelector("details");
+  if (rootDetails && !rootDetails.open) {
+    rootDetails.open = true;
+
+    const rootContainer = rootDetails.querySelector("div");
+    waitForChildren(rootContainer, () => {
+      // Root render bitince path zincirine başla
+      paths.forEach(path => {
+        const segments = path.split(".");
+        expandSegmentChain(rootContainer, segments, 0, () => {
+          completed++;
+          if (completed === totalPaths) {
+            callback();
+          }
+        });
+      });
+    });
   } else {
-    doSearchAction();
+    // Root zaten açıksa direkt başla
+    const rootContainer = rootDetails ? rootDetails.querySelector("div") : output;
+    paths.forEach(path => {
+      const segments = path.split(".");
+      expandSegmentChain(rootContainer, segments, 0, () => {
+        completed++;
+        if (completed === totalPaths) {
+          callback();
+        }
+      });
+    });
   }
 }
+
+// Segmentleri zincirleme aç
+function expandSegmentChain(container, segments, index, done) {
+  if (index >= segments.length) {
+    done();
+    return;
+  }
+
+  const seg = segments[index];
+  const summaries = container.querySelectorAll("summary");
+  let matchSummary = null;
+
+  summaries.forEach(summary => {
+    const keySpan = summary.querySelector(".key");
+    if (keySpan && keySpan.textContent.replace(/:$/, "") === seg) {
+      matchSummary = summary;
+    }
+  });
+
+  if (!matchSummary) {
+    done(); // bulunamadıysa çık
+    return;
+  }
+
+  const detail = matchSummary.parentElement;
+  if (!detail.open) detail.open = true;
+
+  const childContainer = detail.querySelector("div");
+
+  if (childContainer) {
+    // Eğer alt children daha render edilmediyse bekle ve sonra devam et
+    waitForChildren(childContainer, () => {
+      expandSegmentChain(childContainer, segments, index + 1, done);
+    });
+  } else {
+    done();
+  }
+}
+
+// Çocukların yüklenmesini bekleme
+function waitForChildren(container, done) {
+  const check = () => {
+    if (container.childNodes.length > 0) {
+      done();
+    } else {
+      setTimeout(check, 30);
+    }
+  };
+  check();
+}
+
+// Highlight fonksiyonu aynı kalabilir
+function highlightMatches(term) {
+  const walk = (node) => {
+    if (node.nodeType === 3) {
+      const idx = node.nodeValue.toLowerCase().indexOf(term.toLowerCase());
+      if (idx !== -1) {
+        const span = document.createElement("span");
+        span.className = "highlight";
+        const match = node.splitText(idx);
+        const after = match.splitText(term.length);
+        const cloned = match.cloneNode(true);
+        span.appendChild(cloned);
+        match.parentNode.replaceChild(span, match);
+        matches.push(span);
+      }
+    } else if (node.nodeType === 1 && node.childNodes) {
+      Array.from(node.childNodes).forEach(walk);
+    }
+  };
+  walk(output);
+}
+
+// Render functionality
+renderBtn.addEventListener("click", renderJson);
+reverseBtn.addEventListener("click", reverseToJson);
 
 function renderJson() {
   const input = jsonInput.value.trim();
@@ -245,24 +399,28 @@ function renderTree(data, key = "") {
   if (typeof data === "object" && data !== null) {
     const isArray = Array.isArray(data);
     const details = document.createElement("details");
-    details.open = true;
 
     const summary = document.createElement("summary");
     const count = isArray ? data.length : Object.keys(data).length;
     summary.innerHTML = `<span class="key">${
       key || (isArray ? `Array[${count}]` : `Object{${count}}`)
-    } </span>`;
+    }</span>`;
     details.appendChild(summary);
 
+    // Lazy yükleme: boş container ve flag
     const container = document.createElement("div");
     container.style.marginLeft = "16px";
+    details.appendChild(container);
 
-    Object.entries(data).forEach(([k, v]) => {
-      const child = renderTree(v, k);
-      container.appendChild(child);
+    let isLoaded = false;
+
+    details.addEventListener("toggle", () => {
+      if (details.open && !isLoaded) {
+        isLoaded = true;
+        renderChildrenChunked(data, container);
+      }
     });
 
-    details.appendChild(container);
     return details;
   } else {
     const line = document.createElement("div");
@@ -282,6 +440,33 @@ function renderTree(data, key = "") {
   }
 }
 
+function renderChildrenChunked(data, container) {
+  const entries = Object.entries(data);
+  let i = 0;
+  const CHUNK_SIZE = 20; // performans için ayarlanabilir
+
+  function renderChunk() {
+    const fragment = document.createDocumentFragment();
+
+    for (
+      let count = 0;
+      count < CHUNK_SIZE && i < entries.length;
+      count++, i++
+    ) {
+      const [k, v] = entries[i];
+      fragment.appendChild(renderTree(v, k));
+    }
+
+    container.appendChild(fragment);
+
+    if (i < entries.length) {
+      requestAnimationFrame(renderChunk);
+    }
+  }
+
+  requestAnimationFrame(renderChunk);
+}
+
 function formatValue(val) {
   if (typeof val === "string") return `"${val}"`;
   if (val === null) return "null";
@@ -296,12 +481,12 @@ function getTypeClass(val) {
   return "";
 }
 
-function doSearchAction() {
+function doSearchAction(term) {
   clearHighlights();
   matches = [];
   currentIndex = -1;
 
-  const searchTerm = searchInput.value.trim();
+  const searchTerm = term.trim();
   if (!searchTerm) return;
 
   lastSearchTerm = searchTerm;
@@ -362,7 +547,7 @@ function goNext() {
 
 function applyScript() {
   const raw = jsonInput.value.trim();
-  const script = scriptInput.value.trim();
+  const script = scriptInline.value.trim();
 
   if (!raw || !script) return;
 
