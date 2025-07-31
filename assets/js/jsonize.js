@@ -1,34 +1,27 @@
 // Elements
 const searchBtn = document.getElementById("searchBtn");
 const scriptBtn = document.getElementById("scriptBtn");
-const runScript = document.getElementById("runScript");
-const cancelSearch = document.getElementById("cancelSearch");
-const cancelScript = document.getElementById("cancelScript");
 const jsonInput = document.getElementById("jsonInput");
 const output = document.getElementById("output");
 const renderBtn = document.getElementById("renderBtn");
 const reverseBtn = document.getElementById("reverseBtn");
-const resizeHandle = document.getElementById("resizeHandle");
-const mainArea = document.getElementById("mainArea");
 const themeToggle = document.getElementById("themeToggle");
 const navbarBrand = document.getElementById("navbarBrand");
 const examplesBtn = document.getElementById("examplesBtn");
 const scriptExamplePopup = document.getElementById("scriptExamplePopup");
 const searchInline = document.getElementById("searchInline");
 const scriptInline = document.getElementById("scriptInline");
+const beautifyBtn = document.getElementById("beautifyBtn");
 
 let matches = [];
 let currentIndex = -1;
 let lastSearchTerm = "";
 let currentJsonData = null;
-let isDragging = false;
+let isTreeView = false;
+let isBeautified = false;
 
-// Theme toggle functionality
-const savedTheme = localStorage.getItem("theme") || "light";
-if (savedTheme === "dark") {
-  document.body.classList.add("dark");
-  themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-}
+// Theme toggle functionality - using in-memory storage instead of localStorage
+let currentTheme = "light";
 
 themeToggle.addEventListener("click", () => {
   document.body.classList.toggle("dark");
@@ -36,7 +29,7 @@ themeToggle.addEventListener("click", () => {
   themeToggle.innerHTML = isDark
     ? '<i class="fas fa-sun"></i>'
     : '<i class="fas fa-moon"></i>';
-  localStorage.setItem("theme", isDark ? "dark" : "light");
+  currentTheme = isDark ? "dark" : "light";
 });
 
 // Navbar brand click functionality
@@ -44,38 +37,43 @@ navbarBrand.addEventListener("click", () => {
   window.location.reload();
 });
 
-// Toggle göster/gizle
+// Toggle show/hide inline inputs
 searchBtn.addEventListener("click", () => {
   searchInline.style.display =
     searchInline.style.display === "none" ? "block" : "none";
   scriptInline.style.display = "none";
-  searchInline.focus();
+  if (searchInline.style.display === "block") {
+    searchInline.focus();
+  }
 });
 
 scriptBtn.addEventListener("click", () => {
   scriptInline.style.display =
     scriptInline.style.display === "none" ? "block" : "none";
   searchInline.style.display = "none";
-  scriptInline.focus();
-});
-
-
-
-scriptInline.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    applyScript(scriptInline.value);
+  if (scriptInline.style.display === "block") {
+    scriptInline.focus();
   }
 });
 
+// Script inline enter key handling
+scriptInline.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    applyScript();
+  }
+});
+
+// Examples button functionality
 examplesBtn.addEventListener("click", (e) => {
-  e.stopPropagation(); // olayın dışarıya sıçramasını engelle
+  e.stopPropagation();
   scriptExamplePopup.style.display =
     scriptExamplePopup.style.display === "block" ? "none" : "block";
 });
 
+// Example script selection
 document.querySelectorAll("#scriptExamplePopup li").forEach((li) => {
   li.addEventListener("click", (e) => {
-    e.stopPropagation(); // dış click gibi algılanmasın
+    e.stopPropagation();
     const script = li.getAttribute("data-script");
     scriptInline.value = script;
     scriptInline.style.display = "block";
@@ -84,104 +82,135 @@ document.querySelectorAll("#scriptExamplePopup li").forEach((li) => {
   });
 });
 
+// Close popups when clicking outside
 document.addEventListener("click", (e) => {
-  const popups = [
-    document.getElementById("searchPopup"),
-    document.getElementById("scriptPopup"),
-    document.getElementById("scriptExamplePopup"),
-  ];
-  const triggers = [
-    document.getElementById("searchBtn"),
-    document.getElementById("scriptBtn"),
-    document.getElementById("examplesBtn"),
-  ];
+  if (
+    !scriptExamplePopup.contains(e.target) &&
+    !examplesBtn.contains(e.target)
+  ) {
+    scriptExamplePopup.style.display = "none";
+  }
 
-  popups.forEach((popup, i) => {
-    if (popup && !popup.contains(e.target) && !triggers[i].contains(e.target)) {
-      popup.style.display = "none";
-
-      const input = popup.querySelector("input");
-      if (input) input.value = "";
+  if (!e.target.closest(".panel-actions")) {
+    if (!searchInline.contains(e.target) && !searchBtn.contains(e.target)) {
+      searchInline.style.display = "none";
     }
-  });
+    if (!scriptInline.contains(e.target) && !scriptBtn.contains(e.target)) {
+      scriptInline.style.display = "none";
+    }
+  }
 });
 
-// Resize functionality
-let currentPosition = 50; // Start at 50% (equal split)
-let startX = 0;
-let startPosition = 0;
+beautifyBtn.addEventListener("click", () => {
+  const input = jsonInput.value.trim();
+  if (!input) return;
 
-resizeHandle.addEventListener("mousedown", (e) => {
-  isDragging = true;
-  startX = e.clientX;
-  startPosition = currentPosition;
-  resizeHandle.classList.add("dragging");
-  document.addEventListener("mousemove", handleDrag);
-  document.addEventListener("mouseup", stopDrag);
-  e.preventDefault();
+  try {
+    const json = JSON.parse(input);
+
+    if(isTreeView) {
+       // Minify: no spaces, no indentation
+      reverseToJson();
+      jsonInput.value = JSON.stringify(json);
+      beautifyBtn.innerHTML = '<i class="fas fa-magic"></i>';
+      beautifyBtn.title = "Beautify JSON";
+      isBeautified = false;
+    }
+    else if (isBeautified) {
+      // Minify: no spaces, no indentation
+      jsonInput.value = JSON.stringify(json);
+      beautifyBtn.innerHTML = '<i class="fas fa-magic"></i>';
+      beautifyBtn.title = "Beautify JSON";
+      isBeautified = false;
+    } else {
+      // Beautify: 2 spaces indentation
+      jsonInput.value = JSON.stringify(json, null, 2);
+      beautifyBtn.innerHTML = '<i class="fas fa-compress"></i>';
+      beautifyBtn.title = "Minify JSON";
+      isBeautified = true;
+    }
+  } catch (err) {
+    // Show error briefly in the button
+    const originalIcon = beautifyBtn.innerHTML;
+    const originalTitle = beautifyBtn.title;
+    beautifyBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+    beautifyBtn.title = `Invalid JSON: ${err.message}`;
+
+    setTimeout(() => {
+      beautifyBtn.innerHTML = originalIcon;
+      beautifyBtn.title = originalTitle;
+    }, 2000);
+  }
 });
 
-function handleDrag(e) {
-  if (!isDragging) return;
+// Enter key functionality for JSON input
+jsonInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    renderJson();
+  } else if (e.key === "Enter" && !e.shiftKey && !isTreeView) {
+    e.preventDefault();
+    renderJson();
+  }
+});
 
-  const deltaX = e.clientX - startX;
-  const containerWidth = mainArea.offsetWidth;
-  const deltaPercent = (deltaX / containerWidth) * 100;
+// Main render and reverse functionality
+renderBtn.addEventListener("click", renderJson);
+reverseBtn.addEventListener("click", reverseToJson);
 
-  let newPosition = startPosition + deltaPercent;
+function renderJson() {
+  const input = jsonInput.value.trim();
+  if (!input) {
+    return;
+  }
 
-  // Set limits: minimum 20%, maximum 80%
-  newPosition = Math.max(20, Math.min(80, newPosition));
+  try {
+    const json = JSON.parse(input);
+    currentJsonData = json;
 
-  currentPosition = newPosition;
-  updatePanelSizes();
-}
+    // Hide textarea and show tree view
+    jsonInput.style.display = "none";
+    output.style.display = "block";
+    renderBtn.style.display = "none";
+    reverseBtn.style.display = "block";
 
-function updatePanelSizes() {
-  const leftPercent = currentPosition;
-  const rightPercent = 100 - currentPosition;
-
-  mainArea.style.gridTemplateColumns = `${leftPercent}% auto ${rightPercent}%`;
-}
-
-function stopDrag() {
-  isDragging = false;
-  resizeHandle.classList.remove("dragging");
-  document.removeEventListener("mousemove", handleDrag);
-  document.removeEventListener("mouseup", stopDrag);
-}
-
-// Initialize the slider position
-updatePanelSizes();
-
-function togglePopup(popup, button) {
-  // Close other popups
-  document.querySelectorAll(".input-popup").forEach((p) => {
-    if (p !== popup) {
-      p.classList.remove("active");
-    }
-  });
-  document.querySelectorAll(".panel-btn").forEach((b) => {
-    if (b !== button) {
-      b.classList.remove("active");
-    }
-  });
-
-  // Toggle current popup
-  popup.classList.toggle("active");
-  button.classList.toggle("active");
-
-  if (popup.classList.contains("active")) {
-    popup.querySelector("input").focus();
+    output.innerHTML = "";
+    output.appendChild(renderTree(json));
+    isTreeView = true;
+  } catch (err) {
+    output.innerHTML = `<div class="error">Invalid JSON: ${err.message}</div>`;
+    jsonInput.style.display = "none";
+    output.style.display = "block";
+    renderBtn.style.display = "none";
+    reverseBtn.style.display = "block";
+    currentJsonData = null;
+    isTreeView = true;
   }
 }
 
-function closePopup(popup, button) {
-  popup.classList.remove("active");
-  button.classList.remove("active");
+function reverseToJson() {
+  // Show textarea and hide tree view
+  jsonInput.style.display = "block";
+  output.style.display = "none";
+  renderBtn.style.display = "block";
+  reverseBtn.style.display = "none";
+  beautifyBtn.innerHTML = '<i class="fas fa-compress"></i>';
+  isTreeView = false;
+  isBeautified = true;
+
+  if (currentJsonData) {
+    try {
+      const beautifiedJson = JSON.stringify(currentJsonData, null, 2);
+      jsonInput.value = beautifiedJson;
+    } catch (err) {
+      console.error("Error reversing JSON:", err);
+    }
+  }
+
+  jsonInput.focus();
 }
 
-// Enter ile çalıştır
+// Search functionality
 searchInline.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     handleSearch(searchInline.value);
@@ -189,6 +218,8 @@ searchInline.addEventListener("keydown", (e) => {
 });
 
 function handleSearch(term) {
+  if (!isTreeView || !currentJsonData) return;
+
   clearHighlights();
   matches = [];
   currentIndex = -1;
@@ -196,10 +227,10 @@ function handleSearch(term) {
 
   lastSearchTerm = term;
 
-  // Pathleri bul
+  // Find paths containing the term
   const foundPaths = findPathsContainingTerm(currentJsonData, term);
 
-  // Pathleri aç ve highlight callback olarak çağır
+  // Expand paths and highlight as callback
   expandPathsLazy(foundPaths, () => {
     highlightMatches(term);
 
@@ -210,8 +241,7 @@ function handleSearch(term) {
   });
 }
 
-// JSON’da path bulma
-// Key + Value arama
+// Find paths in JSON - Key + Value search
 function findPathsContainingTerm(obj, term, path = "") {
   let paths = [];
   const lowerTerm = term.toLowerCase();
@@ -220,12 +250,12 @@ function findPathsContainingTerm(obj, term, path = "") {
     for (const [key, value] of Object.entries(obj)) {
       const currentPath = path ? `${path}.${key}` : key;
 
-      // Key eşleşmesi
+      // Key match
       if (key.toLowerCase().includes(lowerTerm)) {
         paths.push(currentPath);
       }
 
-      // Value eşleşmesi
+      // Value match
       if (
         typeof value !== "object" &&
         String(value).toLowerCase().includes(lowerTerm)
@@ -233,7 +263,7 @@ function findPathsContainingTerm(obj, term, path = "") {
         paths.push(currentPath);
       }
 
-      // Alt objeleri gez
+      // Traverse sub-objects
       if (typeof value === "object" && value !== null) {
         paths = paths.concat(findPathsContainingTerm(value, term, currentPath));
       }
@@ -253,15 +283,15 @@ function expandPathsLazy(paths, callback) {
     return;
   }
 
-  // Root detayını aç ve render bitmesini bekle
+  // Open root details and wait for render completion
   const rootDetails = output.querySelector("details");
   if (rootDetails && !rootDetails.open) {
     rootDetails.open = true;
 
     const rootContainer = rootDetails.querySelector("div");
     waitForChildren(rootContainer, () => {
-      // Root render bitince path zincirine başla
-      paths.forEach(path => {
+      // After root render completes, start path chain
+      paths.forEach((path) => {
         const segments = path.split(".");
         expandSegmentChain(rootContainer, segments, 0, () => {
           completed++;
@@ -272,9 +302,11 @@ function expandPathsLazy(paths, callback) {
       });
     });
   } else {
-    // Root zaten açıksa direkt başla
-    const rootContainer = rootDetails ? rootDetails.querySelector("div") : output;
-    paths.forEach(path => {
+    // Root is already open, start directly
+    const rootContainer = rootDetails
+      ? rootDetails.querySelector("div")
+      : output;
+    paths.forEach((path) => {
       const segments = path.split(".");
       expandSegmentChain(rootContainer, segments, 0, () => {
         completed++;
@@ -286,7 +318,7 @@ function expandPathsLazy(paths, callback) {
   }
 }
 
-// Segmentleri zincirleme aç
+// Expand segments in chain
 function expandSegmentChain(container, segments, index, done) {
   if (index >= segments.length) {
     done();
@@ -297,7 +329,7 @@ function expandSegmentChain(container, segments, index, done) {
   const summaries = container.querySelectorAll("summary");
   let matchSummary = null;
 
-  summaries.forEach(summary => {
+  summaries.forEach((summary) => {
     const keySpan = summary.querySelector(".key");
     if (keySpan && keySpan.textContent.replace(/:$/, "") === seg) {
       matchSummary = summary;
@@ -305,7 +337,7 @@ function expandSegmentChain(container, segments, index, done) {
   });
 
   if (!matchSummary) {
-    done(); // bulunamadıysa çık
+    done(); // Exit if not found
     return;
   }
 
@@ -315,7 +347,7 @@ function expandSegmentChain(container, segments, index, done) {
   const childContainer = detail.querySelector("div");
 
   if (childContainer) {
-    // Eğer alt children daha render edilmediyse bekle ve sonra devam et
+    // If child nodes not rendered yet, wait and continue
     waitForChildren(childContainer, () => {
       expandSegmentChain(childContainer, segments, index + 1, done);
     });
@@ -324,7 +356,7 @@ function expandSegmentChain(container, segments, index, done) {
   }
 }
 
-// Çocukların yüklenmesini bekleme
+// Wait for children to load
 function waitForChildren(container, done) {
   const check = () => {
     if (container.childNodes.length > 0) {
@@ -336,7 +368,7 @@ function waitForChildren(container, done) {
   check();
 }
 
-// Highlight fonksiyonu aynı kalabilir
+// Highlight function
 function highlightMatches(term) {
   const walk = (node) => {
     if (node.nodeType === 3) {
@@ -358,43 +390,7 @@ function highlightMatches(term) {
   walk(output);
 }
 
-// Render functionality
-renderBtn.addEventListener("click", renderJson);
-reverseBtn.addEventListener("click", reverseToJson);
-
-function renderJson() {
-  const input = jsonInput.value.trim();
-  if (!input) {
-    output.innerHTML = "";
-    currentJsonData = null;
-    return;
-  }
-
-  try {
-    const json = JSON.parse(input);
-    currentJsonData = json;
-    output.innerHTML = "";
-    output.appendChild(renderTree(json));
-  } catch (err) {
-    output.innerHTML = `<div class="error">Invalid JSON: ${err.message}</div>`;
-    currentJsonData = null;
-  }
-}
-
-function reverseToJson() {
-  if (!currentJsonData) {
-    jsonInput.value = "";
-    return;
-  }
-
-  try {
-    const beautifiedJson = JSON.stringify(currentJsonData, null, 2);
-    jsonInput.value = beautifiedJson;
-  } catch (err) {
-    console.error("Error reversing JSON:", err);
-  }
-}
-
+// Tree rendering functions
 function renderTree(data, key = "") {
   if (typeof data === "object" && data !== null) {
     const isArray = Array.isArray(data);
@@ -407,7 +403,7 @@ function renderTree(data, key = "") {
     }</span>`;
     details.appendChild(summary);
 
-    // Lazy yükleme: boş container ve flag
+    // Lazy loading: empty container and flag
     const container = document.createElement("div");
     container.style.marginLeft = "16px";
     details.appendChild(container);
@@ -443,7 +439,7 @@ function renderTree(data, key = "") {
 function renderChildrenChunked(data, container) {
   const entries = Object.entries(data);
   let i = 0;
-  const CHUNK_SIZE = 20; // performans için ayarlanabilir
+  const CHUNK_SIZE = 20; // Adjustable for performance
 
   function renderChunk() {
     const fragment = document.createDocumentFragment();
@@ -481,50 +477,12 @@ function getTypeClass(val) {
   return "";
 }
 
-function doSearchAction(term) {
-  clearHighlights();
-  matches = [];
-  currentIndex = -1;
-
-  const searchTerm = term.trim();
-  if (!searchTerm) return;
-
-  lastSearchTerm = searchTerm;
-  highlightMatches(searchTerm);
-
-  if (matches.length > 0) {
-    currentIndex = 0;
-    updateActiveMatch();
-  }
-}
-
 function clearHighlights() {
   matches.forEach((span) => {
     span.outerHTML = span.innerText;
   });
   matches = [];
   currentIndex = -1;
-}
-
-function highlightMatches(term) {
-  const walk = (node) => {
-    if (node.nodeType === 3) {
-      const idx = node.nodeValue.toLowerCase().indexOf(term.toLowerCase());
-      if (idx !== -1) {
-        const span = document.createElement("span");
-        span.className = "highlight";
-        const match = node.splitText(idx);
-        const after = match.splitText(term.length);
-        const cloned = match.cloneNode(true);
-        span.appendChild(cloned);
-        match.parentNode.replaceChild(span, match);
-        matches.push(span);
-      }
-    } else if (node.nodeType === 1 && node.childNodes) {
-      Array.from(node.childNodes).forEach(walk);
-    }
-  };
-  walk(output);
 }
 
 function updateActiveMatch() {
@@ -539,36 +497,71 @@ function updateActiveMatch() {
   }
 }
 
-function goNext() {
-  if (matches.length === 0) return;
-  currentIndex = (currentIndex + 1) % matches.length;
-  updateActiveMatch();
-}
-
 function applyScript() {
-  const raw = jsonInput.value.trim();
   const script = scriptInline.value.trim();
+  if (!script) return;
 
-  if (!raw || !script) return;
+  if (!isTreeView) {
+    // If in text mode, try to parse and apply script
+    const raw = jsonInput.value.trim();
+    if (!raw) return;
 
-  let parsed;
-  try {
-    parsed = JSON.parse(raw);
-  } catch (e) {
-    output.innerHTML = `<div class="error">Invalid JSON: ${e.message}</div>`;
-    currentJsonData = null;
-    return;
-  }
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (e) {
+      output.innerHTML = `<div class="error">Invalid JSON: ${e.message}</div>`;
+      jsonInput.style.display = "none";
+      output.style.display = "block";
+      renderBtn.style.display = "none";
+      reverseBtn.style.display = "block";
+      currentJsonData = null;
+      isTreeView = true;
+      return;
+    }
 
-  try {
-    const scriptResult = eval(
-      `(() => { const data = ${JSON.stringify(parsed)}; return ${script}; })()`
-    );
-    currentJsonData = scriptResult;
-    output.innerHTML = "";
-    output.appendChild(renderTree(scriptResult));
-  } catch (e) {
-    output.innerHTML = `<div class="error">Script error: ${e.message}</div>`;
-    currentJsonData = null;
+    try {
+      const scriptResult = eval(
+        `(() => { const data = ${JSON.stringify(
+          parsed
+        )}; return ${script}; })()`
+      );
+      currentJsonData = scriptResult;
+
+      // Switch to tree view
+      jsonInput.style.display = "none";
+      output.style.display = "block";
+      renderBtn.style.display = "none";
+      reverseBtn.style.display = "block";
+      isTreeView = true;
+
+      output.innerHTML = "";
+      output.appendChild(renderTree(scriptResult));
+    } catch (e) {
+      output.innerHTML = `<div class="error">Script error: ${e.message}</div>`;
+      jsonInput.style.display = "none";
+      output.style.display = "block";
+      renderBtn.style.display = "none";
+      reverseBtn.style.display = "block";
+      currentJsonData = null;
+      isTreeView = true;
+    }
+  } else {
+    // If in tree view, apply script to current data
+    if (!currentJsonData) return;
+
+    try {
+      const scriptResult = eval(
+        `(() => { const data = ${JSON.stringify(
+          currentJsonData
+        )}; return ${script}; })()`
+      );
+      currentJsonData = scriptResult;
+      output.innerHTML = "";
+      output.appendChild(renderTree(scriptResult));
+    } catch (e) {
+      output.innerHTML = `<div class="error">Script error: ${e.message}</div>`;
+      currentJsonData = null;
+    }
   }
 }

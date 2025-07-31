@@ -31,88 +31,95 @@
     </nav>
 
     <div class="container">
-      <div class="main-area" id="mainArea">
-        <div class="panel" id="inputPanel">
-          <div class="panel-header">
-            <h2>JSON Input</h2>
-            <div class="panel-actions">
-              <input
-                type="text"
-                id="searchInline"
-                class="inline-input"
-                placeholder="Search in JSON..."
-                style="display: none"
-              />
-              <input
-                type="text"
-                id="scriptInline"
-                class="inline-input"
-                placeholder="data.filter(x => x.age > 25)"
-                style="display: none"
-              />
+      <div class="main-panel">
+        <div class="panel-header">
+          <h2>JSON Tool</h2>
+          <div class="panel-actions">
+            <input
+              type="text"
+              id="searchInline"
+              class="inline-input"
+              placeholder="Search in JSON..."
+              style="display: none"
+            />
+            <input
+              type="text"
+              id="scriptInline"
+              class="inline-input"
+              placeholder="data.filter(x => x.age > 25)"
+              style="display: none"
+            />
 
-              <button class="panel-btn" id="searchBtn" title="Search">
-                <i class="fas fa-search"></i>
-              </button>
-              <button class="panel-btn" id="scriptBtn" title="Run Script">
-                <i class="fas fa-code"></i>
-              </button>
+            <button class="panel-btn" id="searchBtn" title="Search">
+              <i class="fas fa-search"></i>
+            </button>
+            <button class="panel-btn" id="scriptBtn" title="Run Script">
+              <i class="fas fa-code"></i>
+            </button>
 
-              <div class="script-example-container">
-                <button
-                  class="panel-btn"
-                  id="examplesBtn"
-                  title="Script Examples"
-                >
-                  <i class="fas fa-lightbulb"></i>
-                </button>
-                <div class="script-example-popup" id="scriptExamplePopup">
-                  <h3>Script Examples</h3>
-                  <h5>(Exclusive for Darwin)</h5>
-                  <h6>QUOTE:</h6>
-                  <ul>
-                    <li data-script="data.filter(x => x.age > 25)">
-                      Filter by Age
-                    </li>
-                    <li data-script="data.map(x => x.name)">Get By Name</li>
-                    <li
-                      data-script="data.employees.filter(x => x.name.toLowerCase().includes('john'))"
-                    >
-                      Find Employee By Name
-                    </li>
-                  </ul>
-                </div>
+            <div class="script-example-container">
+              <button
+                class="panel-btn"
+                id="examplesBtn"
+                title="Script Examples"
+              >
+                <i class="fas fa-lightbulb"></i>
+              </button>
+              <div class="script-example-popup" id="scriptExamplePopup">
+                <h3>Script Examples</h3>
+                <h5>(Exclusive for Darwin)</h5>
+                <h6>QUOTE:</h6>
+                <ul>
+                  <li data-script="data.filter(x => x.age > 25)">
+                    Filter by Age
+                  </li>
+                  <li data-script="data.map(x => x.name)">Get By Name</li>
+                  <li
+                    data-script="data.employees.filter(x => x.name.toLowerCase().includes('john'))"
+                  >
+                    Find Employee By Name
+                  </li>
+                </ul>
               </div>
             </div>
+            <!-- Add this button after the examplesBtn in the panel-actions div -->
+            <button
+              class="panel-btn"
+              id="beautifyBtn"
+              title="Beautify/Minify JSON"
+            >
+              <i class="fas fa-magic"></i>
+            </button>
           </div>
+        </div>
+
+        <div id="mainContent">
           <textarea
             id="jsonInput"
-            placeholder="Paste your JSON here..."
+            placeholder="Paste your JSON here and press Enter to render..."
           ></textarea>
+          <div id="output" style="display: none"></div>
         </div>
 
-        <div class="button-container">
+        <div class="action-buttons">
           <button id="renderBtn" class="action-btn">
-            <i class="fas fa-arrow-right"></i>
+            <i class="fas fa-arrow-down"></i>
+            Render
           </button>
-          <button id="reverseBtn" class="action-btn reverse-btn">
-            <i class="fas fa-arrow-left"></i>
+          <button
+            id="reverseBtn"
+            class="action-btn reverse-btn"
+            style="display: none"
+          >
+            <i class="fas fa-arrow-up"></i>
+            Back to Text
           </button>
-          <div class="resize-container">
-            <div class="resize-handle" id="resizeHandle"></div>
-          </div>
-        </div>
-
-        <div class="panel" id="outputPanel">
-          <div class="panel-header">
-            <h2>Tree View</h2>
-          </div>
-          <div id="output"></div>
         </div>
       </div>
     </div>
+
     <div id="contactSupport">
-      <h6>v1.1</h6>
+      <h6>v1.5</h6>
       <h5>Work In Progress</h5>
       <h4>Please Contact Abdulkerem Kılıç For Suggestions</h4>
     </div>
