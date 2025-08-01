@@ -12,6 +12,7 @@ const scriptExamplePopup = document.getElementById("scriptExamplePopup");
 const searchInline = document.getElementById("searchInline");
 const scriptInline = document.getElementById("scriptInline");
 const beautifyBtn = document.getElementById("beautifyBtn");
+const originalBtn = document.getElementById("originalBtn");
 
 let matches = [];
 let currentIndex = -1;
@@ -19,6 +20,11 @@ let lastSearchTerm = "";
 let currentJsonData = null;
 let isTreeView = false;
 let isBeautified = false;
+let originalJsonData = null; // Store the original JSON data
+
+// Flagging system variables
+let flaggedFields = new Map(); // Store flagged field info: path -> {element, originalParent, originalIndex, flagOrder}
+let flagCounter = 0; // To maintain flag order
 
 // Theme toggle functionality - using in-memory storage instead of localStorage
 let currentTheme = "light";
@@ -108,15 +114,14 @@ beautifyBtn.addEventListener("click", () => {
   try {
     const json = JSON.parse(input);
 
-    if(isTreeView) {
-       // Minify: no spaces, no indentation
+    if (isTreeView) {
+      // Minify: no spaces, no indentation
       reverseToJson();
       jsonInput.value = JSON.stringify(json);
       beautifyBtn.innerHTML = '<i class="fas fa-magic"></i>';
       beautifyBtn.title = "Beautify JSON";
       isBeautified = false;
-    }
-    else if (isBeautified) {
+    } else if (isBeautified) {
       // Minify: no spaces, no indentation
       jsonInput.value = JSON.stringify(json);
       beautifyBtn.innerHTML = '<i class="fas fa-magic"></i>';
@@ -143,6 +148,32 @@ beautifyBtn.addEventListener("click", () => {
   }
 });
 
+originalBtn.addEventListener("click", () => {
+  if (!originalJsonData) {
+    // Clear all flags when restoring original
+    clearAllFlags();
+    return;
+  }
+
+  // Restore original data
+  currentJsonData = JSON.parse(JSON.stringify(originalJsonData)); // Deep copy
+
+  if (isTreeView) {
+    // Re-render tree view with original data
+    output.innerHTML = "";
+    output.appendChild(renderTree(currentJsonData));
+  } else {
+    // Update text area with original data
+    const beautifiedJson = JSON.stringify(currentJsonData, null, 2);
+    jsonInput.value = beautifiedJson;
+
+    // Update beautify button state
+    isBeautified = true;
+    beautifyBtn.innerHTML = '<i class="fas fa-compress"></i>';
+    beautifyBtn.title = "Minify JSON";
+  }
+});
+
 // Enter key functionality for JSON input
 jsonInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
@@ -166,6 +197,13 @@ function renderJson() {
 
   try {
     const json = JSON.parse(input);
+
+    if (!originalJsonData || !isTreeView) {
+      originalJsonData = JSON.parse(JSON.stringify(json)); // Deep copy
+      originalBtn.style.display = "block"; // Show original button
+      clearAllFlags(); // Clear flags when rendering new JSON
+    }
+
     currentJsonData = json;
 
     // Hide textarea and show tree view
@@ -194,6 +232,7 @@ function reverseToJson() {
   output.style.display = "none";
   renderBtn.style.display = "block";
   reverseBtn.style.display = "none";
+  originalBtn.style.display = "none";
   beautifyBtn.innerHTML = '<i class="fas fa-compress"></i>';
   isTreeView = false;
   isBeautified = true;
@@ -202,6 +241,11 @@ function reverseToJson() {
     try {
       const beautifiedJson = JSON.stringify(currentJsonData, null, 2);
       jsonInput.value = beautifiedJson;
+
+      // Update beautify button state since we're returning beautified JSON
+      isBeautified = true;
+      beautifyBtn.innerHTML = '<i class="fas fa-compress"></i>';
+      beautifyBtn.title = "Minify Json";
     } catch (err) {
       console.error("Error reversing JSON:", err);
     }
@@ -390,6 +434,180 @@ function highlightMatches(term) {
   walk(output);
 }
 
+// Flagging system functions
+function generateFieldPath(element) {
+  const path = [];
+  let current = element;
+
+  while (current && current !== output) {
+    if (current.classList && current.classList.contains("json-field")) {
+      const keyElement = current.querySelector(".key");
+      if (keyElement) {
+        const keyText = keyElement.textContent.replace(/:$/, "");
+        path.unshift(keyText);
+      }
+    }
+    current = current.parentElement;
+  }
+
+  return path.join(".");
+}
+
+function toggleFlag(element, flagIcon) {
+  const fieldPath = generateFieldPath(element);
+
+  if (flaggedFields.has(fieldPath)) {
+    // Unflag the field
+    unflagField(fieldPath, element, flagIcon);
+  } else {
+    // Flag the field
+    flagField(fieldPath, element, flagIcon);
+  }
+}
+
+function flagField(fieldPath, element, flagIcon) {
+  const originalParent = element.parentElement;
+  const originalIndex = Array.from(originalParent.children).indexOf(element);
+
+  // Store original position info
+  flaggedFields.set(fieldPath, {
+    element: element,
+    originalParent: originalParent,
+    originalIndex: originalIndex,
+    flagOrder: flagCounter++,
+  });
+
+  // Update visual state
+  element.classList.add("flagged");
+  flagIcon.classList.add("flagged");
+  flagIcon.innerHTML = '<i class="fas fa-flag"></i>';
+
+  // Move to top of section
+  moveToFlaggedSection(element, originalParent);
+}
+
+function unflagField(fieldPath, element, flagIcon) {
+  const flagInfo = flaggedFields.get(fieldPath);
+  if (!flagInfo) return;
+
+  // Remove from flagged fields
+  flaggedFields.delete(fieldPath);
+
+  // Update visual state
+  element.classList.remove("flagged");
+  flagIcon.classList.remove("flagged");
+  flagIcon.innerHTML = '<i class="far fa-flag"></i>';
+
+  // Move back to original position
+  moveToOriginalPosition(element, flagInfo);
+
+  // Clean up flagged section if empty
+  cleanupFlaggedSection(flagInfo.originalParent);
+}
+
+function moveToFlaggedSection(element, parent) {
+  // Find the correct container - go up to find the nearest details > div container
+  let targetParent = element.parentElement;
+  
+  // If the element is already in a details > div structure, use that div
+  // Otherwise, find the nearest container that should hold the flagged section
+  while (targetParent && targetParent !== output) {
+    if (targetParent.tagName === 'DIV' && 
+        targetParent.parentElement && 
+        targetParent.parentElement.tagName === 'DETAILS') {
+      break;
+    }
+    targetParent = targetParent.parentElement;
+  }
+  
+  if (!targetParent || targetParent === output) {
+    targetParent = element.parentElement;
+  }
+
+  // Check if flagged section exists in THIS specific container
+  let flaggedSection = targetParent.querySelector(':scope > .flagged-section');
+
+  if (!flaggedSection) {
+    // Create flagged section
+    flaggedSection = document.createElement("div");
+    flaggedSection.className = "flagged-section";
+    targetParent.insertBefore(flaggedSection, targetParent.firstChild);
+  }
+
+  // Rest of the function stays the same...
+  const flagInfo = flaggedFields.get(generateFieldPath(element));
+  const existingFlagged = Array.from(flaggedSection.children);
+
+  let insertIndex = existingFlagged.length;
+  for (let i = 0; i < existingFlagged.length; i++) {
+    const existingPath = generateFieldPath(existingFlagged[i]);
+    const existingFlagInfo = flaggedFields.get(existingPath);
+    if (existingFlagInfo && existingFlagInfo.flagOrder > flagInfo.flagOrder) {
+      insertIndex = i;
+      break;
+    }
+  }
+
+  if (insertIndex >= existingFlagged.length) {
+    flaggedSection.appendChild(element);
+  } else {
+    flaggedSection.insertBefore(element, existingFlagged[insertIndex]);
+  }
+}
+
+function moveToOriginalPosition(element, flagInfo) {
+  const { originalParent, originalIndex } = flagInfo;
+  const children = Array.from(originalParent.children);
+
+  // Filter out flagged section when calculating position
+  const nonFlaggedChildren = children.filter(
+    (child) => !child.classList.contains("flagged-section")
+  );
+
+  if (originalIndex >= nonFlaggedChildren.length) {
+    originalParent.appendChild(element);
+  } else {
+    // Find the actual element at the original index (accounting for flagged section)
+    let targetElement = nonFlaggedChildren[originalIndex];
+    if (targetElement) {
+      originalParent.insertBefore(element, targetElement);
+    } else {
+      originalParent.appendChild(element);
+    }
+  }
+}
+
+function cleanupFlaggedSection(parent) {
+  const flaggedSection = parent.querySelector(".flagged-section");
+  if (flaggedSection && flaggedSection.children.length === 0) {
+    flaggedSection.remove();
+  }
+}
+
+function clearAllFlags() {
+  // Restore all flagged elements to their original positions
+  for (const [fieldPath, flagInfo] of flaggedFields.entries()) {
+    const { element } = flagInfo;
+    const flagIcon = element.querySelector(".flag-icon");
+
+    if (element && flagIcon) {
+      element.classList.remove("flagged");
+      flagIcon.classList.remove("flagged");
+      flagIcon.innerHTML = '<i class="far fa-flag"></i>';
+      moveToOriginalPosition(element, flagInfo);
+    }
+  }
+
+  // Clean up all flagged sections
+  document
+    .querySelectorAll(".flagged-section")
+    .forEach((section) => section.remove());
+
+  // Clear the flagged fields map and reset counter
+  flaggedFields.clear();
+  flagCounter = 0;
+}
+
 // Tree rendering functions
 function renderTree(data, key = "") {
   if (typeof data === "object" && data !== null) {
@@ -419,8 +637,26 @@ function renderTree(data, key = "") {
 
     return details;
   } else {
-    const line = document.createElement("div");
-    line.style.margin = "2px 0";
+    const fieldContainer = document.createElement("div");
+    fieldContainer.className = "json-field";
+    fieldContainer.style.margin = "2px 0";
+
+    // Create flag icon
+    const flagIcon = document.createElement("span");
+    flagIcon.className = "flag-icon";
+    flagIcon.innerHTML = '<i class="far fa-flag"></i>';
+    flagIcon.title = "Flag this field";
+
+    // Add click handler for flag
+    flagIcon.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleFlag(fieldContainer, flagIcon);
+    });
+
+    const contentDiv = document.createElement("div");
+    contentDiv.style.display = "flex";
+    contentDiv.style.alignItems = "center";
+    contentDiv.style.flex = "1";
 
     const keySpan = document.createElement("span");
     keySpan.className = "key";
@@ -430,9 +666,13 @@ function renderTree(data, key = "") {
     valueSpan.className = getTypeClass(data);
     valueSpan.textContent = formatValue(data);
 
-    line.appendChild(keySpan);
-    line.appendChild(valueSpan);
-    return line;
+    contentDiv.appendChild(keySpan);
+    contentDiv.appendChild(valueSpan);
+
+    fieldContainer.appendChild(flagIcon);
+    fieldContainer.appendChild(contentDiv);
+
+    return fieldContainer;
   }
 }
 
@@ -535,6 +775,8 @@ function applyScript() {
       reverseBtn.style.display = "block";
       isTreeView = true;
 
+      // Clear flags before re-rendering
+      clearAllFlags();
       output.innerHTML = "";
       output.appendChild(renderTree(scriptResult));
     } catch (e) {

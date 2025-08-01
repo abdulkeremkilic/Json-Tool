@@ -589,6 +589,81 @@ body.dark .success {
 }
 
 /* ========================================
+         FLAGGING SYSTEM STYLES
+         ======================================== */
+
+.json-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0;
+  padding: 2px 0;
+  transition: all 0.2s ease;
+}
+
+.flag-icon {
+  font-size: 12px;
+  cursor: pointer;
+  color: #9ca3af;
+  transition: all 0.2s ease;
+  opacity: 0;
+  padding: 2px 4px;
+  border-radius: 3px;
+  min-width: 16px;
+  text-align: center;
+}
+
+.json-field:hover .flag-icon {
+  opacity: 1;
+}
+
+.flag-icon:hover {
+  color: #f59e0b;
+  background-color: rgba(245, 158, 11, 0.1);
+}
+
+.flag-icon.flagged {
+  opacity: 1 !important;
+  color: #f59e0b;
+  background-color: rgba(245, 158, 11, 0.15);
+}
+
+.json-field.flagged {
+  background-color: rgba(245, 158, 11, 0.05);
+  border-radius: 4px;
+  padding: 4px 6px;
+  margin: 1px 0;
+}
+
+body.dark .flag-icon {
+  color: #6b7280;
+}
+
+body.dark .flag-icon:hover {
+  color: #fbbf24;
+  background-color: rgba(251, 191, 36, 0.1);
+}
+
+body.dark .flag-icon.flagged {
+  color: #fbbf24;
+  background-color: rgba(251, 191, 36, 0.15);
+}
+
+body.dark .json-field.flagged {
+  background-color: rgba(251, 191, 36, 0.05);
+}
+
+.flagged-section {
+  border-top: 2px solid rgba(245, 158, 11, 0.3);
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+body.dark .flagged-section {
+  border-top-color: rgba(251, 191, 36, 0.3);
+}
+
+/* ========================================
          BOTTOM FLOATING ELEMENTS
          ======================================== */
 
