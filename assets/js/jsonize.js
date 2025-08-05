@@ -467,7 +467,13 @@ function toggleFlag(element, flagIcon) {
 
 function flagField(fieldPath, element, flagIcon) {
   const originalParent = element.parentElement;
-  const originalIndex = Array.from(originalParent.children).indexOf(element);
+
+  // Calculate the correct original index (excluding flagged sections)
+  const allSiblings = Array.from(originalParent.children);
+  const nonFlaggedSiblings = allSiblings.filter(
+    (child) => !child.classList.contains("flagged-section")
+  );
+  const originalIndex = nonFlaggedSiblings.indexOf(element);
 
   // Store original position info
   flaggedFields.set(fieldPath, {
@@ -482,7 +488,7 @@ function flagField(fieldPath, element, flagIcon) {
   flagIcon.classList.add("flagged");
   flagIcon.innerHTML = '<i class="fas fa-flag"></i>';
 
-  // Move to top of section
+  // Move to flagged section in the same parent
   moveToFlaggedSection(element, originalParent);
 }
 
@@ -498,43 +504,38 @@ function unflagField(fieldPath, element, flagIcon) {
   flagIcon.classList.remove("flagged");
   flagIcon.innerHTML = '<i class="far fa-flag"></i>';
 
+  // Store reference to the flagged section before moving element
+  const flaggedSection = element.closest(".flagged-section");
+
   // Move back to original position
   moveToOriginalPosition(element, flagInfo);
 
-  // Clean up flagged section if empty
-  cleanupFlaggedSection(flagInfo.originalParent);
+  // Clean up the specific flagged section after moving the element
+  if (flaggedSection && flaggedSection.children.length === 0) {
+    flaggedSection.remove();
+  }
+
+  // Global cleanup to ensure no empty flagged sections remain
+  cleanupAllEmptyFlaggedSections();
 }
 
-function moveToFlaggedSection(element, parent) {
-  // Find the correct container - go up to find the nearest details > div container
-  let targetParent = element.parentElement;
-  
-  // If the element is already in a details > div structure, use that div
-  // Otherwise, find the nearest container that should hold the flagged section
-  while (targetParent && targetParent !== output) {
-    if (targetParent.tagName === 'DIV' && 
-        targetParent.parentElement && 
-        targetParent.parentElement.tagName === 'DETAILS') {
-      break;
-    }
-    targetParent = targetParent.parentElement;
-  }
-  
-  if (!targetParent || targetParent === output) {
-    targetParent = element.parentElement;
-  }
-
-  // Check if flagged section exists in THIS specific container
-  let flaggedSection = targetParent.querySelector(':scope > .flagged-section');
+function moveToFlaggedSection(element, originalParent) {
+  // Check if flagged section already exists in THIS specific container
+  let flaggedSection = originalParent.querySelector(
+    ":scope > .flagged-section"
+  );
 
   if (!flaggedSection) {
-    // Create flagged section
+    // Create flagged section at the very top of this container
     flaggedSection = document.createElement("div");
     flaggedSection.className = "flagged-section";
-    targetParent.insertBefore(flaggedSection, targetParent.firstChild);
+    // Add some basic styling to prevent visual issues
+    flaggedSection.style.borderBottom = "1px solid transparent";
+    flaggedSection.style.marginBottom = "4px";
+    originalParent.insertBefore(flaggedSection, originalParent.firstChild);
   }
 
-  // Rest of the function stays the same...
+  // Move element to flagged section while maintaining flag order
   const flagInfo = flaggedFields.get(generateFieldPath(element));
   const existingFlagged = Array.from(flaggedSection.children);
 
@@ -557,18 +558,42 @@ function moveToFlaggedSection(element, parent) {
 
 function moveToOriginalPosition(element, flagInfo) {
   const { originalParent, originalIndex } = flagInfo;
-  const children = Array.from(originalParent.children);
 
-  // Filter out flagged section when calculating position
-  const nonFlaggedChildren = children.filter(
+  // Get all children except flagged sections
+  const allChildren = Array.from(originalParent.children);
+  const nonFlaggedChildren = allChildren.filter(
     (child) => !child.classList.contains("flagged-section")
   );
 
-  if (originalIndex >= nonFlaggedChildren.length) {
+  // Find the correct insertion point based on original index
+  if (originalIndex === 0) {
+    // If it was the first element, find the first non-flagged-section element
+    const firstNonFlagged = allChildren.find(
+      (child) => !child.classList.contains("flagged-section")
+    );
+    if (firstNonFlagged) {
+      originalParent.insertBefore(element, firstNonFlagged);
+    } else {
+      originalParent.appendChild(element);
+    }
+  } else if (originalIndex >= nonFlaggedChildren.length) {
+    // If it was at the end, append it
     originalParent.appendChild(element);
   } else {
-    // Find the actual element at the original index (accounting for flagged section)
-    let targetElement = nonFlaggedChildren[originalIndex];
+    // Find the element that should come after this one
+    let targetElement = null;
+    let currentNonFlaggedIndex = 0;
+
+    for (const child of allChildren) {
+      if (!child.classList.contains("flagged-section")) {
+        if (currentNonFlaggedIndex === originalIndex) {
+          targetElement = child;
+          break;
+        }
+        currentNonFlaggedIndex++;
+      }
+    }
+
     if (targetElement) {
       originalParent.insertBefore(element, targetElement);
     } else {
@@ -578,10 +603,12 @@ function moveToOriginalPosition(element, flagInfo) {
 }
 
 function cleanupFlaggedSection(parent) {
-  const flaggedSection = parent.querySelector(".flagged-section");
-  if (flaggedSection && flaggedSection.children.length === 0) {
-    flaggedSection.remove();
-  }
+  const flaggedSections = parent.querySelectorAll(":scope > .flagged-section");
+  flaggedSections.forEach((section) => {
+    if (section.children.length === 0) {
+      section.remove();
+    }
+  });
 }
 
 function clearAllFlags() {
@@ -598,14 +625,21 @@ function clearAllFlags() {
     }
   }
 
-  // Clean up all flagged sections
-  document
-    .querySelectorAll(".flagged-section")
-    .forEach((section) => section.remove());
-
   // Clear the flagged fields map and reset counter
   flaggedFields.clear();
   flagCounter = 0;
+
+  // Clean up all flagged sections
+  cleanupAllEmptyFlaggedSections();
+}
+
+function cleanupAllEmptyFlaggedSections() {
+  const allFlaggedSections = document.querySelectorAll(".flagged-section");
+  allFlaggedSections.forEach((section) => {
+    if (section.children.length === 0) {
+      section.remove();
+    }
+  });
 }
 
 // Tree rendering functions
