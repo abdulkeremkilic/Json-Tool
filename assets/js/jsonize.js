@@ -13,6 +13,7 @@ const searchInline = document.getElementById("searchInline");
 const scriptInline = document.getElementById("scriptInline");
 const beautifyBtn = document.getElementById("beautifyBtn");
 const originalBtn = document.getElementById("originalBtn");
+const eraseBtn = document.getElementById("eraseBtn");
 
 let matches = [];
 let currentIndex = -1;
@@ -107,6 +108,36 @@ document.addEventListener("click", (e) => {
   }
 });
 
+eraseBtn.addEventListener("click", () => {
+  // Clear textarea
+  jsonInput.value = "";
+  
+  // Clear output
+  output.innerHTML = "";
+  
+  // Reset all states
+  currentJsonData = null;
+  originalJsonData = null;
+  isTreeView = false;
+  isBeautified = false;
+  
+  // Clear all flags
+  clearAllFlags();
+  
+  // Force back to text mode without calling reverseToJson()
+  jsonInput.style.display = "block";
+  output.style.display = "none";
+  renderBtn.style.display = "block";
+  reverseBtn.style.display = "none";
+  originalBtn.style.display = "none";
+  beautifyBtn.innerHTML = '<i class="fas fa-magic"></i>';
+  beautifyBtn.title = "Beautify JSON";
+  originalBtn.style.display = "none";
+  
+  // Focus on input
+  jsonInput.focus();
+});
+
 beautifyBtn.addEventListener("click", () => {
   const input = jsonInput.value.trim();
   if (!input) return;
@@ -162,6 +193,7 @@ originalBtn.addEventListener("click", () => {
     // Re-render tree view with original data
     output.innerHTML = "";
     output.appendChild(renderTree(currentJsonData));
+    originalBtn.style.display = "none";
   } else {
     // Update text area with original data
     const beautifiedJson = JSON.stringify(currentJsonData, null, 2);
@@ -171,6 +203,7 @@ originalBtn.addEventListener("click", () => {
     isBeautified = true;
     beautifyBtn.innerHTML = '<i class="fas fa-compress"></i>';
     beautifyBtn.title = "Minify JSON";
+    originalBtn.style.display = "none";
   }
 });
 
@@ -200,7 +233,6 @@ function renderJson() {
 
     if (!originalJsonData || !isTreeView) {
       originalJsonData = JSON.parse(JSON.stringify(json)); // Deep copy
-      originalBtn.style.display = "block"; // Show original button
       clearAllFlags(); // Clear flags when rendering new JSON
     }
 
@@ -801,6 +833,7 @@ function applyScript() {
         )}; return ${script}; })()`
       );
       currentJsonData = scriptResult;
+      originalBtn.style.display = "block"; 
 
       // Switch to tree view
       jsonInput.style.display = "none";
@@ -833,6 +866,7 @@ function applyScript() {
         )}; return ${script}; })()`
       );
       currentJsonData = scriptResult;
+      originalBtn.style.display = "block"; 
       output.innerHTML = "";
       output.appendChild(renderTree(scriptResult));
     } catch (e) {
