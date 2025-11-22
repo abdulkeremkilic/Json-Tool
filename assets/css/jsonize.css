@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&display=swap');
+
 /* ========================================
    GLOBAL RESET & VARIABLES
    ======================================== */
@@ -54,9 +56,11 @@ body {
 }
 
 .navbar-brand h1 {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--primary-color);
+  font-family: 'Ubuntu Mono', monospace;
+  letter-spacing: 0;
 }
 
 .theme-toggle {

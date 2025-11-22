@@ -10,6 +10,12 @@ const searchInline = document.getElementById("searchInline");
 const expandBtn = document.getElementById("expandBtn");
 const collapseBtn = document.getElementById("collapseBtn");
 const themeToggle = document.getElementById("themeToggle");
+const navbarBrand = document.getElementById("navbarBrand");
+
+// Refresh on Logo Click
+navbarBrand.addEventListener("click", () => {
+  window.location.reload();
+});
 
 // State
 let currentJsonData = null;
