@@ -27,123 +27,89 @@
 
   <body>
     <nav class="navbar">
-      <div class="navbar-content">
-        <div class="navbar-brand" id="navbarBrand">
-          <h1>JSON Tool</h1>
-        </div>
-        <div class="navbar-actions">
-          <button
-            class="theme-toggle"
-            id="themeToggle"
-            title="Toggle Dark Mode"
-          >
-            <i class="fas fa-moon"></i>
-          </button>
-        </div>
+      <div class="navbar-brand" id="navbarBrand">
+        <h1>JSON Tool</h1>
+      </div>
+      <div class="navbar-actions">
+        <button
+          class="theme-toggle"
+          id="themeToggle"
+          title="Toggle Dark Mode"
+        >
+          <i class="fas fa-moon"></i>
+        </button>
       </div>
     </nav>
 
-    <div class="container">
-      <div class="main-panel">
-        <div class="panel-header">
-          <h2>JSON Tool</h2>
-          <div class="panel-actions">
-            <input
-              type="text"
-              id="searchInline"
-              class="inline-input"
-              placeholder="Search in JSON..."
-              style="display: none"
-            />
-            <input
-              type="text"
-              id="scriptInline"
-              class="inline-input"
-              placeholder="data.filter(x => x.age > 25)"
-              style="display: none"
-            />
-
-            <button class="panel-btn" id="searchBtn" title="Search">
-              <i class="fas fa-search"></i>
-            </button>
-            <button class="panel-btn" id="scriptBtn" title="Run Script">
-              <i class="fas fa-code"></i>
-            </button>
-
-            <div class="script-example-container">
-              <button
-                class="panel-btn"
-                id="examplesBtn"
-                title="Script Examples"
-              >
-                <i class="fas fa-lightbulb"></i>
-              </button>
-              <div class="script-example-popup" id="scriptExamplePopup">
-                <h3>Script Examples</h3>
-                <ul>
-                  <li data-script="data.filter(x => x.age > 25)">
-                    Filter by Age
-                  </li>
-                  <li data-script="data.map(x => x.name)">Get By Name</li>
-                  <li
-                    data-script="data.employees.filter(x => x.name.toLowerCase().includes('john'))"
-                  >
-                    Find Employee By Name
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <!-- Add this button after the examplesBtn in the panel-actions div -->
-            <button
-              class="panel-btn"
-              id="beautifyBtn"
-              title="Beautify/Minify JSON"
-            >
-              <i class="fas fa-magic"></i>
-            </button>
-            <button class="panel-btn" id="eraseBtn" title="Erase All Content">
-              <i class="fas fa-eraser"></i>
-            </button>
-            <button
-              class="panel-btn"
-              id="originalBtn"
-              title="Restore Original JSON"
-              style="display: none"
-            >
-              <i class="fas fa-undo"></i>
-            </button>
+    <div class="app-container">
+      <div class="main-content">
+        <!-- Left Sidebar Ad -->
+        <div class="ad-sidebar left-sidebar">
+          <div class="ad-placeholder vertical">
+            <span>Ad (160x600)</span>
           </div>
         </div>
 
-        <div id="mainContent">
-          <textarea
-            id="jsonInput"
-            placeholder="Paste your JSON here and press Enter to render..."
-          ></textarea>
-          <div id="output" style="display: none"></div>
+        <!-- Left Panel: Input -->
+        <div class="panel input-panel">
+          <div class="panel-header">
+            <h2>Input</h2>
+            <div class="panel-actions">
+              <button class="panel-btn" id="formatBtn" title="Format JSON">
+                <i class="fas fa-indent"></i> Format
+              </button>
+              <button class="panel-btn" id="minifyBtn" title="Minify JSON">
+                <i class="fas fa-compress"></i> Minify
+              </button>
+              <button class="panel-btn" id="clearBtn" title="Clear">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <textarea
+              id="jsonInput"
+              placeholder="Paste your JSON here..."
+            ></textarea>
+          </div>
         </div>
 
-        <div class="action-buttons">
-          <button id="renderBtn" class="action-btn">
-            <i class="fas fa-arrow-down"></i>
-            Render
+        <!-- Center Controls (Optional, can be in panels) -->
+        <div class="center-controls">
+           <button id="processBtn" class="action-btn" title="Process JSON">
+            <i class="fas fa-arrow-right"></i>
           </button>
-          <button
-            id="reverseBtn"
-            class="action-btn reverse-btn"
-            style="display: none"
-          >
-            <i class="fas fa-arrow-up"></i>
-            Back to Text
-          </button>
+        </div>
+
+        <!-- Right Panel: Output -->
+        <div class="panel output-panel">
+          <div class="panel-header">
+            <h2>Tree View</h2>
+            <div class="panel-actions">
+              <div class="search-box">
+                <input type="text" id="searchInline" placeholder="Search..." />
+                <button id="searchBtn"><i class="fas fa-search"></i></button>
+              </div>
+              <button class="panel-btn" id="expandBtn" title="Expand All">
+                <i class="fas fa-expand-arrows-alt"></i>
+              </button>
+              <button class="panel-btn" id="collapseBtn" title="Collapse All">
+                <i class="fas fa-compress-arrows-alt"></i>
+              </button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div id="output"></div>
+          </div>
+        </div>
+
+        <!-- Right Sidebar Ad -->
+        <div class="ad-sidebar">
+          <div class="ad-placeholder vertical">
+            <span>Ad (160x600)</span>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div id="contactSupport">
-      <h6>v1.6</h6>
-      <h5>Work In Progress</h5>
-      <h4>Please Contact Abdulkerem Kılıç For Suggestions</h4>
     </div>
     <script src="assets/js/jsonize.js"></script>
   </body>

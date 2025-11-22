@@ -1,6 +1,27 @@
 /* ========================================
-         GLOBAL RESET & BASE STYLES
-         ======================================== */
+   GLOBAL RESET & VARIABLES
+   ======================================== */
+:root {
+  --primary-color: #2563eb;
+  --primary-hover: #1d4ed8;
+  --bg-color: #f3f4f6;
+  --panel-bg: #ffffff;
+  --text-color: #1f2937;
+  --border-color: #e5e7eb;
+  --header-height: 60px;
+  --ad-top-height: 100px;
+  --sidebar-width: 180px;
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body.dark {
+  --primary-color: #60a5fa;
+  --primary-hover: #3b82f6;
+  --bg-color: #111827;
+  --panel-bg: #1f2937;
+  --text-color: #f3f4f6;
+  --border-color: #374151;
+}
 
 * {
   margin: 0;
@@ -9,1028 +30,372 @@
 }
 
 body {
-  font-family: "Inter", "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background: #f9fafb;
-  min-height: 100vh;
-  color: #111827;
-  line-height: 1.6;
-  margin: 0;
-  padding-top: 60px;
-  font-size: 14px;
-  transition: background-color 0.2s, color 0.2s;
-}
-
-/* Dark theme for body */
-body.dark {
-  background: #1e1e2f;
-  color: #e5e7eb;
+  font-family: var(--font-family);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ========================================
-         TOP NAVBAR SECTION
-         ======================================== */
-
+   NAVBAR
+   ======================================== */
 .navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: #ffffff;
-  border-bottom: 1px solid #d1d5db;
-  z-index: 1000;
-  height: 60px;
-  transition: background-color 0.2s, border-color 0.2s;
-}
-
-/* Dark theme for navbar */
-body.dark .navbar {
-  background: #2a2a3c;
-  border-bottom-color: #3f3f46;
-}
-
-/* Navbar content container */
-.navbar-content {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 16px;
+  height: var(--header-height);
+  background-color: var(--panel-bg);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  height: 100%;
-}
-
-/* Navbar brand/logo section */
-.navbar-brand {
-  cursor: pointer;
-  padding: 8px 12px;
-  background: #ffffff;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.navbar-brand:hover {
-  background: #f9fafb;
-}
-
-body.dark .navbar-brand {
-  background: #2a2a3c;
-}
-
-body.dark .navbar-brand:hover {
-  background: #3f3f46;
+  padding: 0 20px;
+  justify-content: space-between;
+  flex-shrink: 0;
 }
 
 .navbar-brand h1 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #111827;
-  margin: 0;
-  user-select: none;
-  transition: color 0.2s;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-color);
 }
 
-body.dark .navbar-brand h1 {
-  color: #e5e7eb;
-}
-
-/* Theme toggle button in navbar */
 .theme-toggle {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
   padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
-  color: #4b5563;
-  font-size: 14px;
+  border-radius: 6px;
   cursor: pointer;
-  font-family: inherit;
-  border-radius: 4px;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  transition: all 0.2s;
 }
 
 .theme-toggle:hover {
-  background: #f9fafb;
-}
-
-body.dark .theme-toggle {
-  background: #2a2a3c;
-  color: #9ca3af;
-  border-color: #3f3f46;
-}
-
-body.dark .theme-toggle:hover {
-  background: #3f3f46;
+  background-color: var(--bg-color);
 }
 
 /* ========================================
-         MAIN CONTAINER & LAYOUT
-         ======================================== */
-
-.container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 20px auto;
-  padding: 20px;
-  height: calc(100vh - 100px);
-  box-sizing: border-box;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-/* ========================================
-         MAIN PANEL - COMBINED INPUT/OUTPUT
-         ======================================== */
-
-.main-panel {
-  background: #ffffff;
-  padding: 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 800px;
-  height: 100%;
+   APP LAYOUT
+   ======================================== */
+.app-container {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  transition: background-color 0.2s, border-color 0.2s;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  padding: 10px;
+  gap: 10px;
 }
 
-body.dark .main-panel {
-  background: #2a2a3c;
-  border-color: #3f3f46;
+/* Top Ad Banner (Removed) */
+/* .ad-banner-top { display: none; } */
+
+/* Main Content Area (Split View + Sidebar) */
+.main-content {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+  min-height: 0; /* Crucial for nested scrolling */
 }
 
-/* Panel header with title and actions */
+/* Panels */
+.panel {
+  background-color: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.input-panel {
+  flex: 1;
+}
+
+.output-panel {
+  flex: 1;
+}
+
 .panel-header {
+  padding: 10px 15px;
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #d1d5db;
-  flex-shrink: 0;
-  transition: border-color 0.2s;
+  background-color: rgba(0,0,0,0.02);
 }
 
-body.dark .panel-header {
-  border-bottom-color: #3f3f46;
-}
-
-/* Panel title */
 .panel-header h2 {
-  font-size: 18px;
+  font-size: 0.9rem;
   font-weight: 600;
-  color: #111827;
-  transition: color 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-color);
+  opacity: 0.8;
 }
 
-body.dark .panel-header h2 {
-  color: #e5e7eb;
-}
-
-/* Panel action buttons container */
 .panel-actions {
   display: flex;
   gap: 8px;
   align-items: center;
-  flex-wrap: wrap;
 }
 
-/* Individual panel buttons */
-.panel-btn {
-  padding: 6px 8px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
-  color: #4b5563;
-  font-size: 12px;
-  cursor: pointer;
-  position: relative;
-  font-family: inherit;
-  border-radius: 4px;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-  min-width: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.panel-btn:hover {
-  background: #f9fafb;
-}
-
-.panel-btn.active {
-  background: #2563eb;
-  color: #ffffff;
-  border-color: #2563eb;
-}
-
-body.dark .panel-btn {
-  background: #2a2a3c;
-  color: #9ca3af;
-  border-color: #3f3f46;
-}
-
-body.dark .panel-btn:hover {
-  background: #3f3f46;
-}
-
-body.dark .panel-btn.active {
-  background: #60a5fa;
-  color: #ffffff;
-  border-color: #60a5fa;
-}
-
-/* ========================================
-         INPUT/OUTPUT AREAS
-         ======================================== */
-
-#mainContent {
+.panel-body {
   flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Center Controls */
+.center-controls {
   display: flex;
   flex-direction: column;
-  min-height: 0;
-}
-
-/* JSON input textarea */
-#jsonInput {
-  width: 100%;
-  flex: 1;
-  min-height: 300px;
-  padding: 12px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
-  color: #111827;
-  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
-  font-size: 13px;
-  line-height: 1.5;
-  resize: vertical;
-  outline: none;
-  border-radius: 4px;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-}
-
-#jsonInput:focus {
-  border-color: #2563eb;
-}
-
-#jsonInput::placeholder {
-  color: #9ca3af;
-}
-
-body.dark #jsonInput {
-  background: #1e1e2f;
-  color: #e5e7eb;
-  border-color: #3f3f46;
-}
-
-body.dark #jsonInput:focus {
-  border-color: #60a5fa;
-}
-
-body.dark #jsonInput::placeholder {
-  color: #6b7280;
-}
-
-/* Action buttons container */
-.action-buttons {
-  display: flex;
-  gap: 12px;
-  margin: 16px 0;
   justify-content: center;
+  padding: 0 5px;
 }
 
-/* Main action buttons */
 .action-btn {
-  padding: 10px 20px;
-  border: 1px solid #d1d5db;
-  background: #2563eb;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 500;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
   cursor: pointer;
-  font-family: inherit;
-  border-radius: 4px;
-  transition: background-color 0.2s, border-color 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: transform 0.2s, background-color 0.2s;
 }
 
 .action-btn:hover {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
+  transform: scale(1.1);
+  background-color: var(--primary-hover);
 }
 
-body.dark .action-btn {
-  background: #60a5fa;
-  border-color: #60a5fa;
+/* Right Sidebar Ad */
+.ad-sidebar {
+  width: 160px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Align to top */
 }
 
-body.dark .action-btn:hover {
-  background: #3b82f6;
-  border-color: #3b82f6;
+/* Ad Placeholders */
+.ad-placeholder {
+  background-color: #e5e7eb;
+  border: 2px dashed #9ca3af;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
-/* Reverse/secondary action buttons */
-.reverse-btn {
-  background: #ffffff;
-  color: #111827;
-  border: 1px solid #d1d5db;
+/* .ad-banner-top .ad-placeholder { width: 728px; height: 90px; } */
+
+.ad-sidebar .ad-placeholder {
+  width: 160px;
+  height: 600px;
 }
 
-.reverse-btn:hover {
-  background: #f9fafb;
-}
-
-body.dark .reverse-btn {
-  background: #2a2a3c;
-  color: #e5e7eb;
-  border-color: #3f3f46;
-}
-
-body.dark .reverse-btn:hover {
-  background: #3f3f46;
-}
-
-/* Output display area */
-#output {
-  width: 100%;
-  flex: 1;
-  min-height: 300px;
-  padding: 12px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
-  color: #111827;
-  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
-  font-size: 13px;
-  line-height: 1.5;
-  border-radius: 4px;
-  overflow: auto;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-}
-
-body.dark #output {
-  background: #1e1e2f;
-  color: #e5e7eb;
-  border-color: #3f3f46;
+body.dark .ad-placeholder {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #9ca3af;
 }
 
 /* ========================================
-         INTERACTIVE ELEMENTS & POPUPS
-         ======================================== */
+   INPUT & OUTPUT CONTENT
+   ======================================== */
+#jsonInput {
+  width: 100%;
+  height: 100%;
+  border: none;
+  resize: none;
+  padding: 15px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  background-color: transparent;
+  color: var(--text-color);
+  outline: none;
+}
 
-/* Inline input fields */
-.inline-input {
-  width: 250px;
-  padding: 6px;
-  margin-top: 0px;
-  border: 1px solid #d1d5db;
-  font-size: 12px;
-  background: #fff;
+#output {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  padding: 15px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+}
+
+/* Buttons */
+.panel-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 4px 8px;
   border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
 }
 
-body.dark .inline-input {
-  background: #525267b1;
-  color: #e5e7eb;
-  border-color: #59596387;
+.panel-btn:hover {
+  background-color: var(--bg-color);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
 }
 
-/* Script examples popup */
-.script-example-container {
+/* Search Box */
+.search-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: var(--panel-bg);
+}
+
+.search-box input {
+  border: none;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  width: 120px;
+  background: transparent;
+  color: var(--text-color);
+  outline: none;
+}
+
+.search-box button {
+  border: none;
+  background: transparent;
+  padding: 4px 8px;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.search-box button:hover {
+  color: var(--primary-color);
+}
+
+/* ========================================
+   TREE VIEW STYLES
+   ======================================== */
+details {
+  margin-left: 10px;
+}
+
+summary {
+  cursor: pointer;
+  outline: none;
+  list-style: none; /* Hide default marker */
   position: relative;
-  display: inline-block;
+  padding-left: 15px;
 }
 
-.script-example-popup {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 250px;
-  padding: 16px;
-  border-radius: 8px;
-  background: rgba(157, 147, 147, 0.532);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  z-index: 1000;
+summary::-webkit-details-marker {
   display: none;
 }
 
-body.dark .script-example-popup {
-  background: rgba(101, 96, 96, 0.619);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
+summary::before {
+  content: '▶';
+  font-size: 0.6rem;
+  position: absolute;
+  left: 0;
+  top: 4px;
+  transition: transform 0.2s;
+  color: var(--text-color);
+  opacity: 0.6;
 }
 
-.script-example-popup h3 {
-  font-size: 14px;
-  margin-bottom: 12px;
+details[open] > summary::before {
+  transform: rotate(90deg);
 }
 
-.script-example-popup h5,
-.script-example-popup h6 {
-  font-size: 12px;
-  margin-bottom: 6px;
-}
-
-.script-example-popup ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.script-example-popup li {
-  padding: 6px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.script-example-popup li:hover {
-  background-color: #748dc9;
-}
-
-/* ========================================
-         TREE VIEW STYLES (FOR JSON OUTPUT)
-         ======================================== */
-
-/* Collapsible tree structure */
-details {
-  margin: 3px 0;
-  padding-left: 12px;
-  border-left: 1px solid #d1d5db;
-  transition: border-color 0.2s;
-}
-
-body.dark details {
-  border-left-color: #3f3f46;
-}
-
-/* Tree node summary/header */
-summary {
-  cursor: pointer;
-  font-weight: 500;
-  margin-bottom: 3px;
-  color: #111827;
-  user-select: none;
-  transition: color 0.2s;
-}
-
-summary:hover {
-  color: #2563eb;
-}
-
-body.dark summary {
-  color: #e5e7eb;
-}
-
-body.dark summary:hover {
-  color: #60a5fa;
-}
-
-/* JSON key styling */
 .key {
-  color: #111827;
-  font-weight: 600;
-  transition: color 0.2s;
+  color: #8b5cf6; /* Purple for keys */
+  font-weight: 500;
 }
 
 body.dark .key {
-  color: #e5e7eb;
+  color: #a78bfa;
 }
 
-/* JSON value type styling */
-.value-string {
-  color: #dc2626;
-  transition: color 0.2s;
-}
+.value-string { color: #10b981; } /* Green */
+.value-number { color: #f59e0b; } /* Amber */
+.value-boolean { color: #ef4444; } /* Red */
+.value-null { color: #9ca3af; } /* Gray */
 
-body.dark .value-string {
-  color: #f87171;
-}
-
-.value-number {
-  color: #2563eb;
-  transition: color 0.2s;
-}
-
-body.dark .value-number {
-  color: #60a5fa;
-}
-
-.value-boolean {
-  color: #059669;
-  transition: color 0.2s;
-}
-
-body.dark .value-boolean {
-  color: #34d399;
-}
-
-.value-null {
-  color: #6b7280;
-  transition: color 0.2s;
-}
-
-body.dark .value-null {
-  color: #9ca3af;
-}
-
-/* ========================================
-         UTILITY CLASSES & STATES
-         ======================================== */
-
-/* Highlighting for search/selection */
-.highlight {
-  background: #fef3c7;
-  color: #111827;
-  padding: 1px 3px;
-  font-weight: 600;
-  border-radius: 2px;
-  transition: background-color 0.2s, color 0.2s;
-}
-
-.highlight.active {
-  background: #dc2626;
-  color: #ffffff;
-}
-
-body.dark .highlight {
-  background: #fcd34d;
-  color: #1f2937;
-}
-
-body.dark .highlight.active {
-  background: #f87171;
-  color: #ffffff;
-}
-
-/* Status message styling */
-.error {
-  color: #dc2626;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-body.dark .error {
-  color: #f87171;
-}
-
-.success {
-  color: #059669;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-body.dark .success {
-  color: #34d399;
-}
-
-/* ========================================
-         FLAGGING SYSTEM STYLES
-         ======================================== */
-
+/* Flag Styles */
 .json-field {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 2px 0;
   padding: 2px 0;
-  transition: all 0.2s ease;
+  border-radius: 4px;
 }
 
 .flag-icon {
-  font-size: 12px;
+  margin-right: 8px;
   cursor: pointer;
-  color: #9ca3af;
-  transition: all 0.2s ease;
-  opacity: 0;
-  padding: 2px 4px;
-  border-radius: 3px;
-  min-width: 16px;
-  text-align: center;
+  color: var(--border-color);
+  opacity: 0.3;
+  transition: all 0.2s;
+  font-size: 0.8rem;
 }
 
-.json-field:hover .flag-icon {
+.json-field:hover .flag-icon,
+summary:hover .flag-icon {
   opacity: 1;
-}
-
-.flag-icon:hover {
-  color: #f59e0b;
-  background-color: rgba(245, 158, 11, 0.1);
+  color: #9ca3af;
 }
 
 .flag-icon.flagged {
-  opacity: 1 !important;
-  color: #f59e0b;
-  background-color: rgba(245, 158, 11, 0.15);
-}
-
-.json-field.flagged {
-  background-color: rgba(245, 158, 11, 0.05);
-  border-radius: 4px;
-  padding: 4px 6px;
-  margin: 1px 0;
-}
-
-body.dark .flag-icon {
-  color: #6b7280;
-}
-
-body.dark .flag-icon:hover {
-  color: #fbbf24;
-  background-color: rgba(251, 191, 36, 0.1);
-}
-
-body.dark .flag-icon.flagged {
-  color: #fbbf24;
-  background-color: rgba(251, 191, 36, 0.15);
-}
-
-body.dark .json-field.flagged {
-  background-color: rgba(251, 191, 36, 0.05);
+  opacity: 1;
+  color: #f59e0b; /* Amber for flagged */
 }
 
 .flagged-section {
-  border-top: 2px solid rgba(245, 158, 11, 0.3);
-  padding-top: 8px;
-  margin-top: 8px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+  background-color: rgba(245, 158, 11, 0.05); /* Light amber bg */
 }
 
-body.dark .flagged-section {
-  border-top-color: rgba(251, 191, 36, 0.3);
-}
-
-/* ========================================
-         BOTTOM FLOATING ELEMENTS
-         ======================================== */
-
-/* Contact support floating card */
-#contactSupport {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  text-align: center;
-  color: #5c78d3;
-  background: rgba(30, 30, 47, 0.95);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 12px 16px;
-  border-radius: 12px;
-  z-index: 1000;
-  width: auto;
-  max-width: 280px;
-  min-width: 200px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(92, 120, 211, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  transform: translateY(0);
-}
-
-#contactSupport:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-  background: rgba(30, 30, 47, 0.98);
-}
-
-#contactSupport h6 {
-  font-size: 10px;
-  margin: 0 0 4px 0;
-  opacity: 0.8;
-  font-weight: 500;
-}
-
-#contactSupport h5 {
-  font-size: 11px;
-  margin: 0 0 6px 0;
-  font-weight: 600;
-  color: #7c3aed;
-}
-
-#contactSupport h4 {
-  font-size: 12px;
-  margin: 0;
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-body.dark #contactSupport {
-  background: rgba(255, 255, 255, 0.95);
-  color: #059669;
-  border: 1px solid rgba(5, 150, 105, 0.3);
-}
-
-body.dark #contactSupport:hover {
-  background: rgba(255, 255, 255, 0.98);
-}
-
-body.dark #contactSupport h5 {
-  color: #8b5cf6;
-}
-
-/* ========================================
-         RESPONSIVE DESIGN - TABLET
-         ======================================== */
-
-@media (max-width: 992px) {
-  .container {
-    max-width: 90%;
-    padding: 16px;
-  }
-
-  .main-panel {
-    max-width: none;
-  }
-
-  #contactSupport {
-    bottom: 15px;
-    right: 15px;
-    max-width: 250px;
-    min-width: 180px;
+/* Responsive */
+@media (max-width: 1024px) {
+  .ad-sidebar {
+    display: none;
   }
 }
-
-/* ========================================
-         RESPONSIVE DESIGN - MOBILE
-         ======================================== */
 
 @media (max-width: 768px) {
-  body {
-    padding-top: 50px;
-    font-size: 13px;
-  }
-
-  .navbar {
-    height: 50px;
-  }
-
-  .navbar-content {
-    padding: 0 12px;
-  }
-
-  .navbar-brand h1 {
-    font-size: 14px;
-  }
-
-  .theme-toggle {
-    padding: 6px 8px;
-    font-size: 12px;
-  }
-
-  .container {
-    padding: 12px;
-    height: calc(100vh - 50px - 24px);
-  }
-
-  .main-panel {
-    padding: 12px;
-  }
-
-  .panel-header h2 {
-    font-size: 16px;
-  }
-
-  .panel-actions {
-    gap: 6px;
-  }
-
-  .panel-btn {
-    padding: 5px 6px;
-    font-size: 11px;
-    min-width: 28px;
-  }
-
-  .action-btn {
-    padding: 8px 16px;
-    font-size: 13px;
-  }
-
-  .action-buttons {
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  #jsonInput {
-    height: 200px;
-    font-size: 12px;
-    padding: 10px;
-  }
-
-  #output {
-    min-height: 150px;
-    font-size: 12px;
-    padding: 10px;
-  }
-
-  .inline-input {
-    width: 200px;
-    font-size: 11px;
-    padding: 5px;
-  }
-
-  .script-example-popup {
-    width: 200px;
-    padding: 12px;
-  }
-
-  #contactSupport {
-    bottom: 12px;
-    right: 12px;
-    left: 12px;
-    max-width: none;
-    min-width: auto;
-    padding: 10px 12px;
-    border-radius: 8px;
-  }
-
-  #contactSupport h6 {
-    font-size: 9px;
-  }
-
-  #contactSupport h5 {
-    font-size: 10px;
-  }
-
-  #contactSupport h4 {
-    font-size: 11px;
-  }
-}
-
-/* ========================================
-         RESPONSIVE DESIGN - SMALL MOBILE
-         ======================================== */
-
-@media (max-width: 480px) {
-  .container {
-    padding: 8px;
-    height: calc(100vh - 50px - 16px);
-  }
-
-  .main-panel {
-    padding: 8px;
-  }
-
-  .panel-header h2 {
-    font-size: 14px;
-  }
-
-  .panel-header {
+  .main-content {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
   }
-
-  .panel-actions {
-    align-self: stretch;
-    justify-content: flex-end;
-    gap: 4px;
+  
+  .center-controls {
+    flex-direction: row;
+    padding: 10px 0;
   }
-
-  .panel-btn {
-    padding: 4px 5px;
-    font-size: 10px;
-    min-width: 24px;
-  }
-
+  
   .action-btn {
-    padding: 6px 12px;
-    font-size: 12px;
+    transform: rotate(90deg);
   }
-
-  .action-buttons {
-    gap: 6px;
+  
+  .action-btn:hover {
+    transform: rotate(90deg) scale(1.1);
   }
-
-  #jsonInput {
-    height: 150px;
-    font-size: 11px;
-    padding: 8px;
-  }
-
-  #output {
-    min-height: 120px;
-    font-size: 11px;
-    padding: 8px;
-  }
-
-  .inline-input {
-    width: 100%;
-    font-size: 10px;
-    padding: 4px;
-  }
-
-  .script-example-popup {
-    width: calc(100vw - 32px);
-    left: -8px;
-    padding: 8px;
-  }
-
-  .script-example-popup h3 {
-    font-size: 12px;
-  }
-
-  .script-example-popup h5,
-  .script-example-popup h6 {
-    font-size: 10px;
-  }
-
-  .script-example-popup li {
-    font-size: 10px;
-    padding: 4px 6px;
-  }
-
-  #contactSupport {
-    padding: 8px 10px;
-    border-radius: 6px;
-  }
-
-  #contactSupport h6 {
-    font-size: 8px;
-  }
-
-  #contactSupport h5 {
-    font-size: 9px;
-  }
-
-  #contactSupport h4 {
-    font-size: 10px;
+  
+  .ad-banner-top {
+    display: none; /* Hide large banner on mobile */
   }
 }
 
-/* ========================================
-         RESPONSIVE DESIGN - VERY SMALL SCREENS
-         ======================================== */
 
-@media (max-width: 360px) {
-  body {
-    font-size: 12px;
-  }
-
-  .container {
-    padding: 6px;
-  }
-
-  .main-panel {
-    padding: 6px;
-  }
-
-  #jsonInput {
-    height: 120px;
-    font-size: 10px;
-    padding: 6px;
-  }
-
-  #output {
-    min-height: 100px;
-    font-size: 10px;
-    padding: 6px;
-  }
-
-  #contactSupport h4 {
-    display: none;
-  }
-
-  #contactSupport:hover h4 {
-    display: block;
-  }
-
-  #contactSupport::after {
-    content: "👆 Tap for info";
-    font-size: 8px;
-    opacity: 0.7;
-    display: block;
-    margin-top: 2px;
-  }
-
-  #contactSupport:hover::after {
-    display: none;
-  }
-}
-
-/* ========================================
-         RESPONSIVE DESIGN - LANDSCAPE MOBILE
-         ======================================== */
-
-@media (max-width: 768px) and (orientation: landscape) {
-  .container {
-    height: calc(100vh - 45px);
-  }
-
-  .navbar {
-    height: 45px;
-  }
-
-  body {
-    padding-top: 45px;
-  }
-
-  #jsonInput {
-    height: 120px;
-  }
-
-  #output {
-    min-height: 100px;
-  }
-}
