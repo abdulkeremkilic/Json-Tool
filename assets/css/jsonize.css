@@ -89,8 +89,7 @@ body {
   gap: 10px;
 }
 
-/* Top Ad Banner (Removed) */
-/* .ad-banner-top { display: none; } */
+
 
 /* Main Content Area (Split View + Sidebar) */
 .main-content {
@@ -200,7 +199,7 @@ body {
   font-weight: 500;
 }
 
-/* .ad-banner-top .ad-placeholder { width: 728px; height: 90px; } */
+
 
 .ad-sidebar .ad-placeholder {
   width: 160px;
@@ -438,7 +437,7 @@ summary:hover .flag-icon {
 }
 
 .search-highlight.active {
-  background-color: #f97316;
+  background-color: #cfea22de;
   /* Orange-500 */
   color: white;
   outline: 2px solid #c2410c;

@@ -101,7 +101,6 @@ function handleSearch(term) {
   const lowerTerm = term.toLowerCase();
 
   // Check if it's a new search or navigation
-  // Also treat as new search if no highlights exist (e.g. after re-render if state wasn't reset, or manual DOM manipulation)
   const hasHighlights = document.querySelectorAll('.search-highlight').length > 0;
 
   if (term !== lastSearchTerm || !hasHighlights) {
@@ -456,9 +455,5 @@ function createTreeElement(data, key, path) {
   }
 }
 
-// Update applyFlags to sort
-// (This function is now redundant as we updated the main applyFlags above, 
-// but we need to remove this duplicate definition if it exists or merge them.
-// The previous tool call replaced the first definition. 
-// I will remove this second definition to avoid conflicts.)
+
 
