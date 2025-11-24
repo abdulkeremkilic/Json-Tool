@@ -97,7 +97,8 @@ body {
   flex: 1;
   display: flex;
   gap: 10px;
-  min-height: 0; /* Crucial for nested scrolling */
+  min-height: 0;
+  /* Crucial for nested scrolling */
 }
 
 /* Panels */
@@ -108,7 +109,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .input-panel {
@@ -125,7 +126,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: rgba(0,0,0,0.02);
+  background-color: rgba(0, 0, 0, 0.02);
 }
 
 .panel-header h2 {
@@ -168,7 +169,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s, background-color 0.2s;
 }
 
@@ -183,7 +184,8 @@ body {
   flex-shrink: 0;
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* Align to top */
+  align-items: flex-start;
+  /* Align to top */
 }
 
 /* Ad Placeholders */
@@ -299,7 +301,8 @@ details {
 summary {
   cursor: pointer;
   outline: none;
-  list-style: none; /* Hide default marker */
+  list-style: none;
+  /* Hide default marker */
   position: relative;
   padding-left: 15px;
 }
@@ -319,12 +322,13 @@ summary::before {
   opacity: 0.6;
 }
 
-details[open] > summary::before {
+details[open]>summary::before {
   transform: rotate(90deg);
 }
 
 .key {
-  color: #8b5cf6; /* Purple for keys */
+  color: #8b5cf6;
+  /* Purple for keys */
   font-weight: 500;
 }
 
@@ -332,10 +336,26 @@ body.dark .key {
   color: #a78bfa;
 }
 
-.value-string { color: #10b981; } /* Green */
-.value-number { color: #f59e0b; } /* Amber */
-.value-boolean { color: #ef4444; } /* Red */
-.value-null { color: #9ca3af; } /* Gray */
+.value-string {
+  color: #10b981;
+}
+
+/* Green */
+.value-number {
+  color: #f59e0b;
+}
+
+/* Amber */
+.value-boolean {
+  color: #ef4444;
+}
+
+/* Red */
+.value-null {
+  color: #9ca3af;
+}
+
+/* Gray */
 
 /* Flag Styles */
 .json-field {
@@ -362,14 +382,16 @@ summary:hover .flag-icon {
 
 .flag-icon.flagged {
   opacity: 1;
-  color: #f59e0b; /* Amber for flagged */
+  color: #f59e0b;
+  /* Amber for flagged */
 }
 
 .flagged-section {
   border-bottom: 1px solid var(--border-color);
   margin-bottom: 5px;
   padding-bottom: 5px;
-  background-color: rgba(245, 158, 11, 0.05); /* Light amber bg */
+  background-color: rgba(245, 158, 11, 0.05);
+  /* Light amber bg */
 }
 
 /* Responsive */
@@ -383,23 +405,42 @@ summary:hover .flag-icon {
   .main-content {
     flex-direction: column;
   }
-  
+
   .center-controls {
     flex-direction: row;
     padding: 10px 0;
   }
-  
+
   .action-btn {
     transform: rotate(90deg);
   }
-  
+
   .action-btn:hover {
     transform: rotate(90deg) scale(1.1);
   }
-  
+
   .ad-banner-top {
-    display: none; /* Hide large banner on mobile */
+    display: none;
+    /* Hide large banner on mobile */
   }
 }
 
 
+
+/* Search Highlight */
+.search-highlight {
+  background-color: #fff9c4;
+  /* Pastel Yellow */
+  color: #000;
+  font-weight: bold;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+.search-highlight.active {
+  background-color: #f97316;
+  /* Orange-500 */
+  color: white;
+  outline: 2px solid #c2410c;
+  /* Orange-700 */
+}
